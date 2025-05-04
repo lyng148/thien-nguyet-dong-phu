@@ -7,6 +7,9 @@ import com.bluemoon.fees.repository.TamTruTamVangRepository;
 import com.bluemoon.fees.repository.NhanKhauRepository;
 import com.bluemoon.fees.service.TamTruTamVangService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +43,31 @@ public class TamTruTamVangServiceImpl implements TamTruTamVangService {
     @Override
     public List<TamTruTamVang> findAll() {
         return tamTruTamVangRepository.findAll();
+    }
+
+    @Override
+    public Page<TamTruTamVang> findAll(Pageable pageable) {
+        Page<TamTruTamVang> page = tamTruTamVangRepository.findAll(pageable);
+        
+        // Initialize any lazy-loaded relationships to prevent serialization issues
+        page.getContent().forEach(record -> {
+            if (record.getNhanKhau() != null) {
+                try {
+                    // Force loading of properties we need
+                    Long nhanKhauId = record.getNhanKhau().getId();
+                    String hoTen = record.getNhanKhau().getHoTen();
+                    
+                    // Set the transient fields for serialization
+                    record.getNhanKhauId();
+                    record.getHoTen();
+                } catch (Exception e) {
+                    // Log and continue if there's an issue with a specific record
+                    System.err.println("Error initializing person data for record " + record.getId() + ": " + e.getMessage());
+                }
+            }
+        });
+        
+        return page;
     }
 
     @Override

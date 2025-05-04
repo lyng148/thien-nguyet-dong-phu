@@ -3,7 +3,6 @@ package com.bluemoon.fees.service.impl;
 import com.bluemoon.fees.entity.HoKhau;
 import com.bluemoon.fees.entity.LichSuHoKhau;
 import com.bluemoon.fees.entity.NhanKhau;
-import com.bluemoon.fees.exception.GlobalExceptionHandler;
 import com.bluemoon.fees.exception.ResourceNotFoundException;
 import com.bluemoon.fees.repository.HoKhauRepository;
 import com.bluemoon.fees.repository.LichSuHoKhauRepository;

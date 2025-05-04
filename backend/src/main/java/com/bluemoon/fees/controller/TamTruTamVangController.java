@@ -10,9 +10,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/temporary-residence") // Using English endpoint for consistency with frontend
@@ -23,19 +27,51 @@ public class TamTruTamVangController {
     private final TamTruTamVangService tamTruTamVangService;
     private final NhanKhauService nhanKhauService;
 
+    // Modified to support pagination and handle serialization
     @GetMapping
-    public ResponseEntity<List<TamTruTamVang>> getAllTamTruTamVang() {
-        log.info("Getting all tam tru tam vang records");
-        List<TamTruTamVang> records = tamTruTamVangService.findAll();
-        log.info("Found {} tam tru tam vang records", records.size());
-        return ResponseEntity.ok(records);
+    public ResponseEntity<List<TamTruTamVang>> getAllTamTruTamVang(
+            @PageableDefault(size = 50) Pageable pageable) {
+        log.info("Getting all tam tru tam vang records with pagination: {}", pageable);
+        try {
+            List<TamTruTamVang> records = tamTruTamVangService.findAll(pageable).getContent();
+            log.info("Found {} tam tru tam vang records", records.size());
+            
+            // Make sure related entities are loaded before serialization
+            records.forEach(record -> {
+                try {
+                    if (record.getNhanKhau() != null) {
+                        // Access the properties to ensure they're loaded
+                        record.getNhanKhauId();
+                        record.getHoTen();
+                    }
+                } catch (Exception e) {
+                    log.warn("Error loading related entity for record {}: {}", record.getId(), e.getMessage());
+                }
+            });
+            
+            return ResponseEntity.ok(records);
+        } catch (Exception e) {
+            log.error("Error fetching temporary residence records: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TamTruTamVang> getTamTruTamVangById(@PathVariable Long id) {
         log.info("Getting tam tru tam vang with id: {}", id);
         return tamTruTamVangService.findById(id)
-            .map(ResponseEntity::ok)
+            .map(record -> {
+                // Make sure related entities are loaded before serialization
+                try {
+                    if (record.getNhanKhau() != null) {
+                        record.getNhanKhauId();
+                        record.getHoTen();
+                    }
+                } catch (Exception e) {
+                    log.warn("Error loading related entity for record {}: {}", record.getId(), e.getMessage());
+                }
+                return ResponseEntity.ok(record);
+            })
             .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

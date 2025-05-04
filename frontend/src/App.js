@@ -18,6 +18,12 @@ import PaymentList from './components/payment/PaymentList';
 import PaymentForm from './components/payment/PaymentForm';
 import Statistics from './components/statistics/Statistics';
 import UserList from './components/user/UserList';
+import HouseholdDetail from './components/household/HouseholdDetail';
+import PersonForm from './components/person/PersonForm';
+
+// Thêm import cho các component mới
+const TemporaryResidence = React.lazy(() => import('./components/temporaryResidence/TemporaryResidence'));
+const PersonList = React.lazy(() => import('./components/person/PersonList'));
 
 // Services & Utilities
 import { getToken, clearToken, isAdmin } from './utils/auth';
@@ -164,6 +170,14 @@ const App = () => {
               } 
             />
             <Route 
+              path="/households/:id" 
+              element={
+                isAuthenticated ? 
+                <HouseholdDetail /> : 
+                <Navigate to="/login" replace />
+              } 
+            />
+            <Route 
               path="/fees" 
               element={
                 isAuthenticated ? 
@@ -235,6 +249,50 @@ const App = () => {
                 <Navigate to="/login" replace />
               } 
             />
+            <Route
+              path="/temporary-residence"
+              element={
+                isAuthenticated ? (
+                  <React.Suspense fallback={<div>Đang tải...</div>}>
+                    <TemporaryResidence />
+                  </React.Suspense>
+                ) : <Navigate to="/login" replace />
+              }
+            />
+            <Route
+              path="/persons"
+              element={
+                isAuthenticated ? (
+                  <React.Suspense fallback={<div>Đang tải...</div>}>
+                    <PersonList />
+                  </React.Suspense>
+                ) : <Navigate to="/login" replace />
+              }
+            />
+            <Route
+              path="/persons/add"
+              element={
+                isAuthenticated ? 
+                <PersonForm /> : 
+                <Navigate to="/login" replace />
+              }
+            />
+            <Route
+              path="/persons/edit/:id"
+              element={
+                isAuthenticated ? 
+                <PersonForm /> : 
+                <Navigate to="/login" replace />
+              }
+            />
+            <Route
+              path="/persons/:id"
+              element={
+                isAuthenticated ? 
+                <PersonForm /> : 
+                <Navigate to="/login" replace />
+              }
+            />
             <Route 
               path="/" 
               element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} 
@@ -246,4 +304,4 @@ const App = () => {
   );
 };
 
-export default App; 
+export default App;

@@ -17,7 +17,10 @@ import {
   Receipt as ReceiptIcon,
   MonetizationOn as FeeIcon,
   Timeline as StatisticsIcon,
-  Group as UserManagementIcon
+  Group as UserManagementIcon,
+  Home as HomeIcon,
+  AssignmentInd as TemporaryResidenceIcon,
+  Person as PersonIcon
 } from '@mui/icons-material';
 import { isAdmin } from '../../utils/auth';
 
@@ -57,6 +60,18 @@ const menuItems = [
     icon: <UserManagementIcon />, 
     path: '/users',
     adminOnly: true
+  },
+  {
+    text: 'Tạm trú/Tạm vắng',
+    icon: <TemporaryResidenceIcon />,
+    path: '/temporary-residence',
+    adminOnly: false
+  },
+  {
+    text: 'Nhân khẩu',
+    icon: <PersonIcon />,
+    path: '/persons',
+    adminOnly: false
   }
 ];
 
@@ -150,4 +165,4 @@ const Sidebar = ({ open }) => {
   );
 };
 
-export default Sidebar; 
+export default Sidebar;
