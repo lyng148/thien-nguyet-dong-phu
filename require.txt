@@ -1,0 +1,84 @@
+Create a web application for managing fees in the BlueMoon apartment complex using React for the frontend and Spring Boot for the backend, with a MySQL database. The application is intended for the apartment’s management board to streamline fee collection and resident management. Below are the requirements, features, and technical details to implement:
+
+1. Project Requirements
+Purpose: Replace the current manual fee management process with an automated system.
+Target Users: Management board members who log in with provided accounts.
+Scope: Focus on version 1.0 features (listed below), with potential future expansion (e.g., parking fees, utility bills).
+2. Main Features
+Based on the document’s introduction (pages 6-8), implement the following features:
+
+User Authentication
+Login functionality for management board members using username and password.
+Users can manage their personal information and change passwords after logging in.
+Only authenticated users can access the system’s features.
+Household Management
+Manage basic information about households (e.g., household ID, owner name, address, number of members).
+Support CRUD operations (Create, Read, Update, Delete) for household records.
+Provide search and filtering options for households.
+Fee Management
+Create and manage different types of fees (e.g., service fees, management fees, voluntary contributions).
+Fee details include: fee ID, name, type (mandatory or voluntary), amount, and due date.
+Support CRUD operations for fees.
+Payment Collection
+Record payments made by households for specific fees.
+Payment details include: payment ID, household ID, fee ID, amount paid, and payment date.
+Prevent duplicate payments for the same fee by the same household.
+Statistics and Reporting
+Generate basic statistics (e.g., total fees collected, outstanding payments).
+Provide visual reports (e.g., charts) with filtering by date range or fee type.
+3. Technical Stack
+Frontend: Use React to build a responsive, user-friendly web interface.
+Backend: Use Spring Boot (Java) to create a robust server-side application.
+Database: Use MySQL to store data centrally, as specified in the document.
+Communication: Implement RESTful APIs for frontend-backend interaction.
+4. Database Schema
+Design the MySQL database with the following tables (adjust fields as needed):
+
+Users: id (PK), username, password (hashed), role
+Households: id (PK), owner_name, address, num_members
+Fees: id (PK), name, type (e.g., 'mandatory' or 'voluntary'), amount, due_date
+Payments: id (PK), household_id (FK), fee_id (FK), amount_paid, payment_date
+Add appropriate foreign key relationships (e.g., household_id in Payments references Households.id).
+
+5. Backend Details
+Spring Boot Setup:
+Use Spring Boot with dependencies: Spring Web, Spring Data JPA, Spring Security, MySQL Driver.
+Configure a RESTful API structure with controllers, services, and repositories.
+API Endpoints (examples):
+POST /api/auth/login: Authenticate user and return a JWT token.
+GET /api/households: Retrieve a list of households.
+POST /api/households: Create a new household.
+PUT /api/households/{id}: Update a household.
+DELETE /api/households/{id}: Delete a household.
+Similar endpoints for /api/fees and /api/payments.
+GET /api/statistics: Fetch fee collection statistics.
+6. Frontend Details
+React Setup:
+Use Create React App or a similar tool to initialize the project.
+Include libraries like Axios (for API calls) and a charting library (e.g., Chart.js) for statistics.
+Components:
+LoginPage: Form with username/password fields, submits to /api/auth/login.
+Dashboard: Overview for authenticated users, showing key metrics.
+HouseholdPage: List households with options to add/edit/delete.
+FeePage: Manage fees with a form and list view.
+PaymentPage: Record payments by selecting household and fee.
+StatisticsPage: Display charts and filterable data.
+7. Security
+Implement JWT (JSON Web Tokens) for authentication:
+Backend generates a token on successful login.
+Frontend includes the token in API request headers for protected routes.
+Hash passwords in the database using Spring Security (e.g., BCrypt).
+8. Development Approach
+Follow an Agile methodology with Scrum, as suggested in the document (Chapter 3).
+Suggested sprints:
+Sprint 1: Project setup, authentication.
+Sprint 2: Household management.
+Sprint 3: Fee management.
+Sprint 4: Payment collection.
+Sprint 5: Statistics and reporting.
+Sprint 6: Testing and refinement.
+9. Additional Notes
+Ensure the UI is intuitive and responsive for management board users.
+Incorporate basic validation (e.g., fee amounts must be positive numbers).
+Follow software engineering best practices (e.g., clean code, documentation) as outlined in the document.
+Please help me set up the initial project structure for both the backend and frontend, including the necessary dependencies and configurations. Provide a basic skeleton code to get started, including a Spring Boot application with a sample REST controller and a React app with a login componen

@@ -1,0 +1,76 @@
+# Backend - Spring Boot
+/backend/target/
+/backend/build/
+/backend/*.log
+/backend/src/main/resources/application.properties
+/backend/src/main/resources/application-*.properties
+/backend/.mvn/
+/backend/logs/
+/backend/.settings/
+/backend/.classpath
+/backend/.project
+/backend/.idea/
+/backend/*.iml
+/backend/*.iws
+/backend/*.ipr
+/backend/HELP.md
+/backend/.DS_Store
+
+# Frontend - React
+node_modules/
+/frontend/node_modules
+/frontend/build/
+/frontend/dist/
+/frontend/coverage/
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.development.local
+/frontend/.env.test.local
+/frontend/.env.production.local
+/frontend/.DS_Store
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/.idea/
+/frontend/*.iml
+
+# IDE and Editor folders
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Compiled Java class files
+*.class
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.Thumbs.db

@@ -1,0 +1,298 @@
+# Summary of Changes for Frontend Integration
+
+## Entity Renames
+1. **Household → HoKhau**
+2. **Fee → KhoanThu**
+3. **Payment → NopPhi**
+
+## New Entities
+1. **NhanKhau** (Person)
+2. **TamTruTamVang** (Temporary Residence)
+3. **LichSuHoKhau** (Household History)
+
+## Endpoint Changes
+The original endpoint paths have been preserved to maintain frontend compatibility:
+- `/api/households` - Still works with `HoKhau` entity
+- `/api/fees` - Still works with `KhoanThu` entity
+- `/api/payments` - Still works with `NopPhi` entity
+
+New endpoints for the new entities:
+- `/api/persons` - For `NhanKhau` entity
+- `/api/temporary-residence` - For `TamTruTamVang` entity
+- `/api/household-history` - For `LichSuHoKhau` entity
+
+## Field Name Changes
+
+### User
+- `role` → `vaiTro`
+
+### Household → HoKhau
+- `id` (unchanged)
+- `ownerName` → `chuHo`
+- `address` (unchanged, as requested)
+- `numMembers` → `soThanhVien`
+- `phoneNumber` → `soDienThoai`
+- `email` (unchanged)
+- `payments` → `cacKhoanNop`
+- `active` → `hoatDong`
+- New fields:
+  - `soHoKhau` (household number)
+  - `soNha` (house number)
+  - `duong` (street)
+  - `phuong` (ward)
+  - `quan` (district)
+  - `ngayLamHoKhau` (household registration date)
+
+### Fee → KhoanThu
+- `id` (unchanged)
+- `name` → `tenKhoanThu`
+- `type` → `batBuoc` (now a Boolean)
+- `amount` → `soTien`
+- `dueDate` → `thoiHan`
+- `description` → `ghiChu`
+- `active` → `hoatDong`
+- `payments` → `cacKhoanNop`
+- New fields:
+  - `ngayTao` (creation date)
+
+### Payment → NopPhi
+- `id` (unchanged)
+- `household` → `hoKhau`
+- `fee` → `khoanThu`
+- `paymentDate` → `ngayNop`
+- `amount` → `tongTien`
+- `amountPaid` → `soTien`
+- `verified` → `daXacNhan`
+- `notes` → `ghiChu`
+- New fields:
+  - `nguoiNop` (payer's name)
+
+## DTO Changes
+
+For frontend integration, we've created a new DTO (NopPhiDTO) that handles the mapping between the old field names and the new Vietnamese field names. The login/authentication responses still use the original field names for compatibility.
+
+### NopPhiDTO (previously PaymentDTO)
+- `householdId` → `hoKhauId`
+- `householdOwnerName` → `chuHo`
+- `address` (unchanged)
+- New: `soHoKhau`
+- `feeId` → `khoanThuId`
+- `feeName` → `tenKhoanThu`
+- `feeAmount` → `soTienKhoanThu`
+- `paymentDate` → `ngayNop`
+- New: `nguoiNop`
+- `amount` → `tongTien`
+- `amountPaid` → `soTien`
+- `verified` → `daXacNhan`
+- `notes` → `ghiChu`
+
+## Authentication Changes
+
+The authentication flow continues to work the same way, but internally the User entity now uses `vaiTro` instead of `role`. The responses from authentication endpoints still use the field name `role` for compatibility with the frontend.
+
+## Frontend Integration Notes
+
+1. When sending data to the backend, your forms need to map to the new field names
+2. When receiving data from the backend for existing entities, the data structure will include the new Vietnamese field names
+3. For authentication, no changes needed as we've maintained compatibility in the responses
+4. For new entities (NhanKhau, TamTruTamVang, LichSuHoKhau), you'll need to create new frontend components using the Vietnamese field names
+
+## Sample Frontend Field Mappings
+
+### Household Form
+```javascript
+// Old mapping
+const householdData = {
+  ownerName: form.ownerName,
+  address: form.address,
+  numMembers: form.numMembers,
+  phoneNumber: form.phoneNumber,
+  email: form.email,
+  active: true
+};
+
+// New mapping
+const hoKhauData = {
+  chuHo: form.ownerName,
+  address: form.address,
+  soThanhVien: form.numMembers,
+  soDienThoai: form.phoneNumber,
+  email: form.email,
+  soHoKhau: form.soHoKhau,
+  soNha: form.soNha,
+  duong: form.duong,
+  phuong: form.phuong,
+  quan: form.quan,
+  ngayLamHoKhau: form.ngayLamHoKhau,
+  hoatDong: true
+};
+```
+
+### Fee Form
+```javascript
+// Old mapping
+const feeData = {
+  name: form.name,
+  type: form.type, // "MANDATORY" or "VOLUNTARY"
+  amount: form.amount,
+  dueDate: form.dueDate,
+  description: form.description,
+  active: true
+};
+
+// New mapping
+const khoanThuData = {
+  tenKhoanThu: form.name,
+  batBuoc: form.type === "MANDATORY", // Now a boolean
+  soTien: form.amount,
+  thoiHan: form.dueDate,
+  ghiChu: form.description,
+  ngayTao: new Date().toISOString().split('T')[0], // Current date
+  hoatDong: true
+};
+```
+
+### Payment Form
+```javascript
+// Old mapping
+const paymentData = {
+  householdId: form.householdId,
+  feeId: form.feeId,
+  paymentDate: form.paymentDate,
+  amount: form.amount,
+  amountPaid: form.amountPaid,
+  notes: form.notes
+};
+
+// New mapping
+const nopPhiData = {
+  hoKhauId: form.householdId,
+  khoanThuId: form.feeId,
+  ngayNop: form.paymentDate,
+  tongTien: form.amount,
+  soTien: form.amountPaid,
+  nguoiNop: form.nguoiNop, // New field
+  ghiChu: form.notes
+};
+```
+
+## New API Endpoints for Managing Household Members
+
+### Added relationship between HoKhau and NhanKhau
+- Updated NhanKhau entity to have a ManyToOne relationship with HoKhau
+- Updated HoKhau entity to have a OneToMany relationship with NhanKhau
+- Added new enum values to LichSuHoKhau.LoaiThayDoi: THEM_NHAN_KHAU, XOA_NHAN_KHAU
+
+### New API endpoints for household member management
+1. **Get all members of a household**
+   - Endpoint: `GET /api/households/{id}/members`
+   - Returns a list of NhanKhau objects for the specified household
+
+2. **Add a person to a household**
+   - Endpoint: `POST /api/households/{id}/members`
+   - Required body parameters:
+     ```json
+     {
+       "nhanKhauId": 123,
+       "quanHeVoiChuHo": "Con",
+       "ghiChu": "Optional note about the addition"
+     }
+     ```
+   - Automatically records this change in the LichSuHoKhau with type THEM_NHAN_KHAU
+   - Returns the updated HoKhau object with the current member count
+
+3. **Remove a person from a household**
+   - Endpoint: `DELETE /api/households/{hoKhauId}/members/{nhanKhauId}`
+   - Optional query parameter: `ghiChu` for adding a note about the removal
+   - Automatically records this change in the LichSuHoKhau with type XOA_NHAN_KHAU
+   - Returns the updated HoKhau object with the current member count
+
+### Business rules
+- A person can only belong to one household at a time
+- When adding a person to a household, if they already belong to another household, an error is thrown
+- When removing a person from a household, the relationship is cleared, and the person becomes unassigned
+- The household's soThanhVien (member count) is automatically updated when adding or removing members
+
+### Frontend Integration Notes
+- Use the `GET /api/households/{id}/members` endpoint to display a list of people in a household
+- Create forms that use the POST endpoint to add members, ensuring you provide:
+  - The person's ID (nhanKhauId)
+  - Their relationship to the household owner (quanHeVoiChuHo)
+  - An optional note (ghiChu)
+- Implement deletion functionality using the DELETE endpoint
+- Handle appropriate error messages (person already in another household, person not found, etc.)
+
+### Sample Frontend Usage
+
+**Fetching household members:**
+```javascript
+// Get all members of a household
+const fetchHouseholdMembers = async (hoKhauId) => {
+  try {
+    const response = await fetch(`/api/households/${hoKhauId}/members`);
+    const members = await response.json();
+    setHouseholdMembers(members);
+  } catch (error) {
+    console.error('Failed to fetch household members:', error);
+  }
+};
+```
+
+**Adding a person to a household:**
+```javascript
+// Add a person to a household
+const addPersonToHousehold = async (hoKhauId, nhanKhauId, relationship, note) => {
+  try {
+    const response = await fetch(`/api/households/${hoKhauId}/members`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nhanKhauId: nhanKhauId,
+        quanHeVoiChuHo: relationship,
+        ghiChu: note
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to add person to household');
+    }
+    
+    const updatedHousehold = await response.json();
+    return updatedHousehold;
+  } catch (error) {
+    console.error('Error adding person to household:', error);
+    throw error;
+  }
+};
+```
+
+**Removing a person from a household:**
+```javascript
+// Remove a person from a household
+const removePersonFromHousehold = async (hoKhauId, nhanKhauId, note) => {
+  try {
+    const url = new URL(`/api/households/${hoKhauId}/members/${nhanKhauId}`, window.location.origin);
+    if (note) {
+      url.searchParams.append('ghiChu', note);
+    }
+    
+    const response = await fetch(url, {
+      method: 'DELETE',
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to remove person from household');
+    }
+    
+    const updatedHousehold = await response.json();
+    return updatedHousehold;
+  } catch (error) {
+    console.error('Error removing person from household:', error);
+    throw error;
+  }
+};
+```
