@@ -490,17 +490,39 @@ const HouseholdDetail = () => {
             >
               <MenuItem value="">Select a person</MenuItem>
               {persons && persons.length > 0 ? (
-                persons
-                  // Filter out people who are already members of this household
-                  .filter(person => !members.some(member => 
-                    member.id === person.id || 
-                    (person.fullName && member.hoTen === person.fullName)
-                  ))
-                  .map(person => (
+                // Get the list of available people (not already in any household)
+                (() => {
+                  const availablePeople = persons.filter(person => {
+                    // First check if they're already in this household
+                    const isInCurrentHousehold = members.some(member => 
+                      member.id === person.id || 
+                      (person.hoTen && member.hoTen === person.hoTen) ||
+                      (person.fullName && member.hoTen === person.fullName)
+                    );
+                    
+                    // Then check if they're already in any household
+                    const isInAnyHousehold = person.householdId !== undefined && person.householdId !== null;
+                    
+                    // Only show people who are not in any household
+                    return !isInCurrentHousehold && !isInAnyHousehold;
+                  });
+                  
+                  // If no available people left, show a message
+                  if (availablePeople.length === 0) {
+                    return [
+                      <MenuItem key="no-available" disabled>
+                        Tất cả mọi người đã có hộ khẩu hoặc đã được thêm vào hộ khẩu này
+                      </MenuItem>
+                    ];
+                  }
+                  
+                  // Otherwise, show the list of available people
+                  return availablePeople.map(person => (
                     <MenuItem key={person.id} value={person.id}>
                       {person.fullName || person.hoTen || 'Unknown Name'}
                     </MenuItem>
-                  ))
+                  ));
+                })()
               ) : (
                 <MenuItem disabled>No available persons found</MenuItem>
               )}
