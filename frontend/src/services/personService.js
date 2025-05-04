@@ -2,23 +2,19 @@ import api from './api';
 
 // Helper function to map frontend data to backend Vietnamese field names
 const mapToBackendFormat = (personData) => {
+  // Map only the fields that match the backend entity
   return {
-    hoTen: personData.fullName,
-    biDanh: personData.nickname || '',
-    ngaySinh: personData.dateOfBirth,
-    gioiTinh: personData.gender,
-    noiSinh: personData.placeOfBirth,
-    nguyenQuan: personData.placeOfOrigin,
-    diaChiHienNay: personData.currentAddress,
-    soCMT: personData.idCardNumber || '',
-    ngayCap: personData.idCardIssueDate || null,
-    noiCap: personData.idCardIssuePlace || '',
-    danToc: personData.ethnicity || '',
-    tonGiao: personData.religion || '',
-    quocTich: personData.nationality || 'Việt Nam',
-    ngheNghiep: personData.occupation || '',
-    noiLamViec: personData.workPlace || '',
-    trangThai: personData.status || 'Thường trú'
+    hoTen: personData.hoTen,
+    ngaySinh: personData.ngaySinh,
+    gioiTinh: personData.gioiTinh,
+    danToc: personData.danToc,
+    tonGiao: personData.tonGiao,
+    cccd: personData.cccd,
+    ngayCap: personData.ngayCap,
+    noiCap: personData.noiCap,
+    ngheNghiep: personData.ngheNghiep,
+    ghiChu: personData.ghiChu
+    // quanHeVoiChuHo, hoKhau sẽ thêm sau khi cần
   };
 };
 

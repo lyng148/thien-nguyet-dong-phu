@@ -11,8 +11,6 @@ import {
   Select,
   MenuItem,
   Button,
-  FormControlLabel,
-  Switch,
   Alert,
   CircularProgress,
   Divider,
@@ -32,22 +30,16 @@ const PersonForm = () => {
   
   // Form state
   const [formData, setFormData] = useState({
-    fullName: '',
-    nickname: '',
-    dateOfBirth: '',
-    gender: '',
-    placeOfBirth: '',
-    placeOfOrigin: '',
-    currentAddress: '',
-    idCardNumber: '',
-    idCardIssueDate: '',
-    idCardIssuePlace: '',
-    ethnicity: '',
-    religion: '',
-    nationality: 'Việt Nam',
-    occupation: '',
-    workPlace: '',
-    status: 'Thường trú'
+    hoTen: '',
+    ngaySinh: '',
+    gioiTinh: '',
+    danToc: '',
+    tonGiao: '',
+    cccd: '',
+    ngayCap: '',
+    noiCap: '',
+    ngheNghiep: '',
+    ghiChu: ''
   });
   
   // UI state
@@ -65,22 +57,16 @@ const PersonForm = () => {
           const data = await getPersonById(id);
           
           setFormData({
-            fullName: data.fullName || '',
-            nickname: data.nickname || '',
-            dateOfBirth: data.dateOfBirth ? formatDateForInput(data.dateOfBirth) : '',
-            gender: data.gender || '',
-            placeOfBirth: data.placeOfBirth || '',
-            placeOfOrigin: data.placeOfOrigin || '',
-            currentAddress: data.currentAddress || '',
-            idCardNumber: data.idCardNumber || '',
-            idCardIssueDate: data.idCardIssueDate ? formatDateForInput(data.idCardIssueDate) : '',
-            idCardIssuePlace: data.idCardIssuePlace || '',
-            ethnicity: data.ethnicity || '',
-            religion: data.religion || '',
-            nationality: data.nationality || 'Việt Nam',
-            occupation: data.occupation || '',
-            workPlace: data.workPlace || '',
-            status: data.status || 'Thường trú'
+            hoTen: data.hoTen || '',
+            ngaySinh: data.ngaySinh ? formatDateForInput(data.ngaySinh) : '',
+            gioiTinh: data.gioiTinh || '',
+            danToc: data.danToc || '',
+            tonGiao: data.tonGiao || '',
+            cccd: data.cccd || '',
+            ngayCap: data.ngayCap ? formatDateForInput(data.ngayCap) : '',
+            noiCap: data.noiCap || '',
+            ngheNghiep: data.ngheNghiep || '',
+            ghiChu: data.ghiChu || ''
           });
         } catch (err) {
           console.error('Error fetching person:', err);
@@ -112,28 +98,22 @@ const PersonForm = () => {
     
     try {
       // Validate form data
-      if (!formData.fullName || !formData.dateOfBirth || !formData.gender || !formData.currentAddress) {
+      if (!formData.hoTen || !formData.ngaySinh || !formData.gioiTinh) {
         throw new Error('Vui lòng điền đầy đủ các trường bắt buộc');
       }
 
       // Create person data object
       const personData = {
-        fullName: formData.fullName,
-        nickname: formData.nickname,
-        dateOfBirth: formData.dateOfBirth,
-        gender: formData.gender,
-        placeOfBirth: formData.placeOfBirth,
-        placeOfOrigin: formData.placeOfOrigin,
-        currentAddress: formData.currentAddress,
-        idCardNumber: formData.idCardNumber,
-        idCardIssueDate: formData.idCardIssueDate,
-        idCardIssuePlace: formData.idCardIssuePlace,
-        ethnicity: formData.ethnicity,
-        religion: formData.religion,
-        nationality: formData.nationality,
-        occupation: formData.occupation,
-        workPlace: formData.workPlace,
-        status: formData.status
+        hoTen: formData.hoTen,
+        ngaySinh: formData.ngaySinh,
+        gioiTinh: formData.gioiTinh,
+        danToc: formData.danToc,
+        tonGiao: formData.tonGiao,
+        cccd: formData.cccd,
+        ngayCap: formData.ngayCap,
+        noiCap: formData.noiCap,
+        ngheNghiep: formData.ngheNghiep,
+        ghiChu: formData.ghiChu
       };
       
       let result;
@@ -220,15 +200,15 @@ const PersonForm = () => {
               )}
 
               <Typography variant="h6" gutterBottom>
-                Thông tin cá nhân
+                Thông tin nhân khẩu
               </Typography>
 
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                   <TextField
                     label="Họ và tên"
-                    name="fullName"
-                    value={formData.fullName}
+                    name="hoTen"
+                    value={formData.hoTen}
                     onChange={handleChange}
                     fullWidth
                     required
@@ -238,21 +218,10 @@ const PersonForm = () => {
                 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Bí danh (nếu có)"
-                    name="nickname"
-                    value={formData.nickname}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={saving}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} sm={6}>
-                  <TextField
                     label="Ngày sinh"
-                    name="dateOfBirth"
+                    name="ngaySinh"
                     type="date"
-                    value={formData.dateOfBirth}
+                    value={formData.ngaySinh}
                     onChange={handleChange}
                     fullWidth
                     required
@@ -267,8 +236,8 @@ const PersonForm = () => {
                   <FormControl fullWidth required disabled={saving}>
                     <InputLabel>Giới tính</InputLabel>
                     <Select
-                      name="gender"
-                      value={formData.gender}
+                      name="gioiTinh"
+                      value={formData.gioiTinh}
                       label="Giới tính"
                       onChange={handleChange}
                     >
@@ -281,94 +250,9 @@ const PersonForm = () => {
                 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Nơi sinh"
-                    name="placeOfBirth"
-                    value={formData.placeOfBirth}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={saving}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Nguyên quán"
-                    name="placeOfOrigin"
-                    value={formData.placeOfOrigin}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={saving}
-                  />
-                </Grid>
-                
-                <Grid item xs={12}>
-                  <TextField
-                    label="Địa chỉ hiện nay"
-                    name="currentAddress"
-                    value={formData.currentAddress}
-                    onChange={handleChange}
-                    fullWidth
-                    required
-                    disabled={saving}
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Divider />
-                  <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                    Thông tin giấy tờ
-                  </Typography>
-                </Grid>
-                
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="Số CMND/CCCD"
-                    name="idCardNumber"
-                    value={formData.idCardNumber}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={saving}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="Ngày cấp"
-                    name="idCardIssueDate"
-                    type="date"
-                    value={formData.idCardIssueDate}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={saving}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="Nơi cấp"
-                    name="idCardIssuePlace"
-                    value={formData.idCardIssuePlace}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={saving}
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Divider />
-                  <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                    Thông tin khác
-                  </Typography>
-                </Grid>
-                
-                <Grid item xs={12} sm={6}>
-                  <TextField
                     label="Dân tộc"
-                    name="ethnicity"
-                    value={formData.ethnicity}
+                    name="danToc"
+                    value={formData.danToc}
                     onChange={handleChange}
                     fullWidth
                     disabled={saving}
@@ -378,8 +262,8 @@ const PersonForm = () => {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     label="Tôn giáo"
-                    name="religion"
-                    value={formData.religion}
+                    name="tonGiao"
+                    value={formData.tonGiao}
                     onChange={handleChange}
                     fullWidth
                     disabled={saving}
@@ -388,9 +272,9 @@ const PersonForm = () => {
                 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Quốc tịch"
-                    name="nationality"
-                    value={formData.nationality}
+                    label="Số CCCD"
+                    name="cccd"
+                    value={formData.cccd}
                     onChange={handleChange}
                     fullWidth
                     disabled={saving}
@@ -398,39 +282,51 @@ const PersonForm = () => {
                 </Grid>
                 
                 <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth required disabled={saving}>
-                    <InputLabel>Trạng thái</InputLabel>
-                    <Select
-                      name="status"
-                      value={formData.status}
-                      label="Trạng thái"
-                      onChange={handleChange}
-                    >
-                      <MenuItem value="Thường trú">Thường trú</MenuItem>
-                      <MenuItem value="Tạm trú">Tạm trú</MenuItem>
-                      <MenuItem value="Tạm vắng">Tạm vắng</MenuItem>
-                    </Select>
-                  </FormControl>
+                  <TextField
+                    label="Ngày cấp"
+                    name="ngayCap"
+                    type="date"
+                    value={formData.ngayCap}
+                    onChange={handleChange}
+                    fullWidth
+                    disabled={saving}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Nơi cấp"
+                    name="noiCap"
+                    value={formData.noiCap}
+                    onChange={handleChange}
+                    fullWidth
+                    disabled={saving}
+                  />
                 </Grid>
                 
                 <Grid item xs={12} sm={6}>
                   <TextField
                     label="Nghề nghiệp"
-                    name="occupation"
-                    value={formData.occupation}
+                    name="ngheNghiep"
+                    value={formData.ngheNghiep}
                     onChange={handleChange}
                     fullWidth
                     disabled={saving}
                   />
                 </Grid>
                 
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12}>
                   <TextField
-                    label="Nơi làm việc"
-                    name="workPlace"
-                    value={formData.workPlace}
+                    label="Ghi chú"
+                    name="ghiChu"
+                    value={formData.ghiChu}
                     onChange={handleChange}
                     fullWidth
+                    multiline
+                    minRows={2}
                     disabled={saving}
                   />
                 </Grid>

@@ -314,9 +314,6 @@ const PersonList = () => {
                         <TableCell>Họ tên</TableCell>
                         <TableCell>Ngày sinh</TableCell>
                         <TableCell>Giới tính</TableCell>
-                        <TableCell>Địa chỉ hiện nay</TableCell>
-                        <TableCell>Số CMT</TableCell>
-                        <TableCell align="center">Trạng thái</TableCell>
                         <TableCell align="right">Thao tác</TableCell>
                       </TableRow>
                     </TableHead>
@@ -326,18 +323,6 @@ const PersonList = () => {
                           <TableCell>{person.fullName}</TableCell>
                           <TableCell>{formatDate(person.dateOfBirth)}</TableCell>
                           <TableCell>{person.gender}</TableCell>
-                          <TableCell>{person.currentAddress}</TableCell>
-                          <TableCell>{person.idCardNumber}</TableCell>
-                          <TableCell align="center">
-                            <Chip 
-                              label={person.status} 
-                              color={
-                                person.status === 'Thường trú' ? 'success' : 
-                                person.status === 'Tạm trú' ? 'primary' : 'default'
-                              }
-                              size="small"
-                            />
-                          </TableCell>
                           <TableCell align="right">
                             <Tooltip title="Chi tiết/Sửa">
                               <IconButton
