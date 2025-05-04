@@ -35,7 +35,8 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Person as PersonIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
+  Visibility as VisibilityIcon
 } from '@mui/icons-material';
 
 import PageHeader from '../common/PageHeader';
@@ -146,6 +147,11 @@ const HouseholdList = () => {
       console.error(`Toggle active status for household ${id} error:`, error);
       setError(`Failed to change household status: ${error.message}`);
     }
+  };
+
+  // Handle view details
+  const handleViewDetails = (id) => {
+    navigate(`/households/${id}`);
   };
 
   // Filter households based on search term
@@ -285,6 +291,15 @@ const HouseholdList = () => {
                             </Tooltip>
                           </TableCell>
                           <TableCell align="right">
+                            <Tooltip title="View Details">
+                              <IconButton
+                                size="small"
+                                onClick={() => handleViewDetails(household.id)}
+                                color="primary"
+                              >
+                                <VisibilityIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
                             <Tooltip title="Edit">
                               <IconButton
                                 size="small"
@@ -380,4 +395,4 @@ const HouseholdList = () => {
   );
 };
 
-export default HouseholdList; 
+export default HouseholdList;

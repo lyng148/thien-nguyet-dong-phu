@@ -19,4 +19,8 @@ public interface LichSuHoKhauService extends BaseService<LichSuHoKhau, Long> {
     LichSuHoKhau createLichSuHoKhau(LichSuHoKhau lichSuHoKhau);
     LichSuHoKhau updateLichSuHoKhau(Long id, LichSuHoKhau lichSuHoKhau);
     void deleteLichSuHoKhau(Long id);
+    
+    // Helper methods for entity references
+    HoKhau getHoKhauReference(Long hoKhauId);
+    NhanKhau getNhanKhauReference(Long nhanKhauId);
 }

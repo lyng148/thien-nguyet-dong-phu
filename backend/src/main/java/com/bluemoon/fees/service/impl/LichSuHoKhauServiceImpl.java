@@ -156,4 +156,16 @@ public class LichSuHoKhauServiceImpl implements LichSuHoKhauService {
                 .orElseThrow(() -> new ResourceNotFoundException("Household history record not found with ID: " + id));
         delete(record);
     }
+    
+    @Override
+    public HoKhau getHoKhauReference(Long hoKhauId) {
+        return hoKhauRepository.findById(hoKhauId)
+                .orElseThrow(() -> new ResourceNotFoundException("Household not found with ID: " + hoKhauId));
+    }
+    
+    @Override
+    public NhanKhau getNhanKhauReference(Long nhanKhauId) {
+        return nhanKhauRepository.findById(nhanKhauId)
+                .orElseThrow(() -> new ResourceNotFoundException("Person not found with ID: " + nhanKhauId));
+    }
 }
