@@ -70,7 +70,7 @@ const Dashboard = () => {
         setMonthlyData(chartData);
       } catch (error) {
         console.error('Error loading dashboard data:', error);
-        setError('Failed to load dashboard data. Please try again.');
+        setError('Không thể tải dữ liệu bảng điều khiển. Vui lòng thử lại.');
       } finally {
         setLoading(false);
       }
@@ -81,9 +81,9 @@ const Dashboard = () => {
 
   // Format currency
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'VND'
     }).format(amount);
   };
 
@@ -91,7 +91,7 @@ const Dashboard = () => {
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('vi-VN', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -101,8 +101,8 @@ const Dashboard = () => {
   return (
     <Box>
       <PageHeader 
-        title="Dashboard" 
-        subtitle="Overview of fee collection and apartment management"
+        title="Bảng Điều Khiển" 
+        subtitle="Tổng quan về thu phí và quản lý căn hộ"
       />
 
       {loading ? (
@@ -112,7 +112,7 @@ const Dashboard = () => {
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6} md={3}>
               <DashboardCard
-                title="Active Households"
+                title="Hộ Khẩu Đang Hoạt Động"
                 value={stats.totalHouseholds}
                 icon={<HomeIcon />}
                 iconBgColor="#e3f2fd"
@@ -122,7 +122,7 @@ const Dashboard = () => {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <DashboardCard
-                title="Active Fees"
+                title="Khoản Thu Đang Hoạt Động"
                 value={stats.totalFees}
                 icon={<MoneyIcon />}
                 iconBgColor="#e8f5e9"
@@ -132,7 +132,7 @@ const Dashboard = () => {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <DashboardCard
-                title="Total Payments"
+                title="Tổng Số Thanh Toán"
                 value={stats.totalPayments}
                 icon={<ReceiptIcon />}
                 iconBgColor="#fff8e1"
@@ -142,12 +142,12 @@ const Dashboard = () => {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <DashboardCard
-                title="Total Collected"
+                title="Tổng Thu"
                 value={formatCurrency(stats.totalCollected)}
                 icon={<TrendingUpIcon />}
                 iconBgColor="#fce4ec"
                 iconColor="#e91e63"
-                subtitle={`${stats.collectionRate}% collection rate`}
+                subtitle={`Tỷ lệ thu ${stats.collectionRate}%`}
                 onClick={() => navigate('/statistics')}
               />
             </Grid>
@@ -159,7 +159,7 @@ const Dashboard = () => {
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="h6">
-                      Fee Collection (Last 6 months)
+                      Thu Phí (6 tháng gần đây)
                     </Typography>
                     <Button
                       size="small"
@@ -167,7 +167,7 @@ const Dashboard = () => {
                       startIcon={<TimelineIcon />}
                       onClick={() => navigate('/statistics')}
                     >
-                      View Statistics
+                      Xem Thống Kê
                     </Button>
                   </Box>
                   <Box sx={{ height: 300, pt: 2 }}>
@@ -176,7 +176,7 @@ const Dashboard = () => {
                         <XAxis dataKey="name" />
                         <YAxis />
                         <Tooltip formatter={(value) => formatCurrency(value)} />
-                        <Bar dataKey="amount" fill="#2196f3" name="Amount Collected" />
+                        <Bar dataKey="amount" fill="#2196f3" name="Số Tiền Đã Thu" />
                       </BarChart>
                     </ResponsiveContainer>
                   </Box>
@@ -188,7 +188,7 @@ const Dashboard = () => {
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="h6">
-                      Recent Payments
+                      Thanh Toán Gần Đây
                     </Typography>
                     <Button
                       size="small"
@@ -196,13 +196,13 @@ const Dashboard = () => {
                       startIcon={<ReceiptIcon />}
                       onClick={() => navigate('/payments')}
                     >
-                      View All
+                      Xem Tất Cả
                     </Button>
                   </Box>
                   {recentPayments.length === 0 ? (
                     <Box sx={{ py: 4, textAlign: 'center' }}>
                       <Typography variant="body1" color="text.secondary" gutterBottom>
-                        No payments have been recorded yet.
+                        Chưa có thanh toán nào được ghi nhận.
                       </Typography>
                       {admin && (
                         <Button 
@@ -211,7 +211,7 @@ const Dashboard = () => {
                           onClick={() => navigate('/payments/add')}
                           sx={{ mt: 2 }}
                         >
-                          Add Payment
+                          Thêm Thanh Toán
                         </Button>
                       )}
                     </Box>
@@ -220,10 +220,10 @@ const Dashboard = () => {
                       <Table size="small">
                         <TableHead>
                           <TableRow>
-                            <TableCell>Household</TableCell>
-                            <TableCell>Fee</TableCell>
-                            <TableCell align="right">Amount</TableCell>
-                            <TableCell align="center">Status</TableCell>
+                            <TableCell>Hộ Khẩu</TableCell>
+                            <TableCell>Phí</TableCell>
+                            <TableCell align="right">Số Tiền</TableCell>
+                            <TableCell align="center">Trạng Thái</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
@@ -234,7 +234,7 @@ const Dashboard = () => {
                               <TableCell align="right">{formatCurrency(payment.amount)}</TableCell>
                               <TableCell align="center">
                                 <Chip
-                                  label={payment.verified ? "Verified" : "Unverified"}
+                                  label={payment.verified ? "Đã Xác Nhận" : "Chưa Xác Nhận"}
                                   color={payment.verified ? "success" : "default"}
                                   size="small"
                                   icon={payment.verified ? <VerifiedIcon fontSize="small" /> : null}
@@ -256,4 +256,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

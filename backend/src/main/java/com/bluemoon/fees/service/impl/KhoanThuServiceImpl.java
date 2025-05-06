@@ -103,6 +103,7 @@ public class KhoanThuServiceImpl implements KhoanThuService {
         existingKhoanThu.setSoTien(khoanThu.getSoTien());
         existingKhoanThu.setThoiHan(khoanThu.getThoiHan());
         existingKhoanThu.setGhiChu(khoanThu.getGhiChu());
+        existingKhoanThu.setHoatDong(khoanThu.isHoatDong());
         
         return khoanThuRepository.save(existingKhoanThu);
     }

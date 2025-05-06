@@ -23,7 +23,7 @@ import {
 import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 
 import PageHeader from '../common/PageHeader';
-import { getPaymentById, createPayment, updatePayment } from '../../services/paymentService';
+import { getPaymentById, createPayment, updatePayment, getPaymentByHouseholdAndFee } from '../../services/paymentService';
 import { getAllHouseholds } from '../../services/householdService';
 import { getAllFees } from '../../services/feeService';
 import { isAdmin } from '../../utils/auth';
@@ -51,6 +51,7 @@ const PaymentForm = () => {
   // Data state
   const [households, setHouseholds] = useState([]);
   const [fees, setFees] = useState([]);
+  const [existingPayment, setExistingPayment] = useState(null);
   
   // UI state
   const [loading, setLoading] = useState(isEdit);
@@ -115,6 +116,35 @@ const PaymentForm = () => {
     
     loadData();
   }, [isEdit, id]);
+
+  // Check if the household has already paid this fee
+  useEffect(() => {
+    const checkExistingPayment = async () => {
+      // Only check if not in edit mode and both household and fee are selected
+      if (!isEdit && formData.householdId && formData.feeId) {
+        try {
+          const existingPaymentData = await getPaymentByHouseholdAndFee(
+            formData.householdId, 
+            formData.feeId
+          );
+          
+          // If we got data back, a payment exists
+          if (existingPaymentData && existingPaymentData.id) {
+            console.log('Found existing payment:', existingPaymentData);
+            setExistingPayment(existingPaymentData);
+          } else {
+            setExistingPayment(null);
+          }
+        } catch (err) {
+          console.error('Error checking existing payment:', err);
+          // Don't set an error message here - just log it
+          setExistingPayment(null);
+        }
+      }
+    };
+    
+    checkExistingPayment();
+  }, [formData.householdId, formData.feeId, isEdit]);
 
   // Handle form changes
   const handleChange = (e) => {
@@ -255,6 +285,14 @@ const PaymentForm = () => {
               {success && (
                 <Alert severity="success" sx={{ mb: 3 }}>
                   {success}
+                </Alert>
+              )}
+              
+              {existingPayment && !isEdit && (
+                <Alert severity="warning" sx={{ mb: 3 }}>
+                  <strong>Chú ý:</strong> Hộ khẩu này đã nộp khoản phí này vào ngày {formatDateForInput(existingPayment.paymentDate)}. 
+                  Số tiền đã nộp: {existingPayment.amountPaid.toLocaleString()} ₫. 
+                  {existingPayment.verified ? ' (Đã xác nhận)' : ' (Chưa xác nhận)'}
                 </Alert>
               )}
 
@@ -418,7 +456,7 @@ const PaymentForm = () => {
                   type="submit"
                   variant="contained"
                   startIcon={<SaveIcon />}
-                  disabled={saving}
+                  disabled={saving || (existingPayment && !isEdit)}
                 >
                   {saving ? (
                     <>

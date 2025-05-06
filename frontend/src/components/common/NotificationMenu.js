@@ -183,7 +183,7 @@ const NotificationMenu = () => {
       >
         <Box sx={{ p: 2, borderBottom: '1px solid divider' }}>
           <Typography variant="h6">
-            Notifications
+            Thông báo
           </Typography>
         </Box>
 
@@ -202,7 +202,7 @@ const NotificationMenu = () => {
         {notifications.length === 0 ? (
           <Box sx={{ p: 2 }}>
             <Typography variant="body2" color="textSecondary">
-              No notifications
+              Không có thông báo mới.
             </Typography>
           </Box>
         ) : (

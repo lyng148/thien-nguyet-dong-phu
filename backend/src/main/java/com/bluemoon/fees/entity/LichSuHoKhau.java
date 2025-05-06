@@ -26,11 +26,11 @@ public class LichSuHoKhau {
     @Column(name = "thoi_gian", nullable = false)
     private LocalDate thoiGian;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "ho_khau_id", nullable = false)
     private HoKhau hoKhau;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "nhan_khau_id", nullable = false)
     private NhanKhau nhanKhau;
     

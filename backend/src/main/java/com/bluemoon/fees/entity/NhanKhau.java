@@ -55,7 +55,7 @@ public class NhanKhau {
     @Column(name = "quan_he_voi_chu_ho")
     private String quanHeVoiChuHo;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "ho_khau_id")
     private HoKhau hoKhau;
     

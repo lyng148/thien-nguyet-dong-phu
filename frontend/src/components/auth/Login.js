@@ -93,7 +93,7 @@ const Login = ({ onLoginSuccess }) => {
     setError('');
 
     if (!validateForm()) {
-      setError('Please fill in all required fields correctly.');
+      setError('Điền đúng tất cả các trường thông tin.');
       return;
     }
 
@@ -123,7 +123,7 @@ const Login = ({ onLoginSuccess }) => {
       const errorMessage = 
         err.response?.data?.message || 
         err.message || 
-        (isRegistering ? 'Registration failed. Please try again.' : 'Login failed. Please check your credentials.');
+        (isRegistering ? 'Đăng ký thất bại. Vui lòng thử lại.' : 'Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.');
       
       setError(errorMessage);
       
@@ -193,7 +193,7 @@ const Login = ({ onLoginSuccess }) => {
 
         <CardContent sx={{ px: 4, py: 3 }}>
           <Typography variant="h5" align="center" sx={{ mb: 1, fontWeight: 600 }}>
-            BlueMoon Fees
+BlueMoon Fees    
           </Typography>
           <Typography 
             variant="body2" 
@@ -201,7 +201,7 @@ const Login = ({ onLoginSuccess }) => {
             align="center" 
             sx={{ mb: 3 }}
           >
-            {isRegistering ? 'Create a new account' : 'Enter your credentials to access the dashboard'}
+            {isRegistering ? 'Tạo tài khoản mới' : 'Nhập thông tin để truy cập bảng điều khiển'}
           </Typography>
 
           {error && (
@@ -222,7 +222,7 @@ const Login = ({ onLoginSuccess }) => {
               required
               disabled={loading}
               error={fieldErrors.username}
-              helperText={fieldErrors.username ? "Username is required" : ""}
+              helperText={fieldErrors.username ? "Tên đăng nhập là bắt buộc" : ""}
             />
             
             {isRegistering && (
@@ -237,7 +237,7 @@ const Login = ({ onLoginSuccess }) => {
                 required
                 disabled={loading}
                 error={fieldErrors.fullName}
-                helperText={fieldErrors.fullName ? "Full name is required" : ""}
+                helperText={fieldErrors.fullName ? "Họ và tên là bắt buộc" : ""}
               />
             )}
             
@@ -254,7 +254,7 @@ const Login = ({ onLoginSuccess }) => {
                 required
                 disabled={loading}
                 error={fieldErrors.email}
-                helperText={fieldErrors.email ? "Valid email is required" : ""}
+                helperText={fieldErrors.email ? "Email hợp lệ là bắt buộc" : ""}
               />
             )}
 
@@ -270,7 +270,7 @@ const Login = ({ onLoginSuccess }) => {
               required
               disabled={loading}
               error={fieldErrors.password}
-              helperText={fieldErrors.password ? "Password is required" : ""}
+              helperText={fieldErrors.password ? "Mật khẩu là bắt buộc" : ""}
             />
 
             {isRegistering && (
@@ -286,7 +286,7 @@ const Login = ({ onLoginSuccess }) => {
                 required
                 disabled={loading}
                 error={fieldErrors.confirmPassword}
-                helperText={fieldErrors.confirmPassword ? "Passwords do not match" : ""}
+                helperText={fieldErrors.confirmPassword ? "Mật khẩu không khớp" : ""}
               />
             )}
 
@@ -301,7 +301,7 @@ const Login = ({ onLoginSuccess }) => {
               {loading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
-                isRegistering ? 'Register' : 'Log In'
+                isRegistering ? 'Đăng ký' : 'Đăng nhập'
               )}
             </Button>
           </form>
@@ -316,8 +316,8 @@ const Login = ({ onLoginSuccess }) => {
               sx={{ textDecoration: 'none' }}
             >
               {isRegistering 
-                ? 'Already have an account? Log in' 
-                : "Don't have an account? Register"}
+                ? 'Đã có tài khoản? Đăng nhập' 
+                : "Chưa có tài khoản? Đăng ký"}
             </Link>
           </Box>
         </CardContent>
@@ -326,4 +326,4 @@ const Login = ({ onLoginSuccess }) => {
   );
 };
 
-export default Login; 
+export default Login;

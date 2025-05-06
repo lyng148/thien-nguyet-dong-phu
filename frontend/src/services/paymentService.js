@@ -21,37 +21,47 @@ const mapToBackendFormat = (paymentData) => {
 const mapToFrontendFormat = (backendData) => {
   if (!backendData) return null;
   
-  console.log("Backend data received in mapToFrontendFormat:", JSON.stringify(backendData));
-  
   // Kiểm tra xem hoKhau và khoanThu có tồn tại không
   const hoKhau = backendData.hoKhau || {};
-  const khoanThu = backendData.khoanThu || {};
   
-  console.log("hoKhau object:", JSON.stringify(hoKhau));
-  console.log("khoanThu object:", JSON.stringify(khoanThu));
+  // Handle the case where khoanThu is just a number (the ID) instead of an object
+  let khoanThu = {};
+  if (backendData.khoanThu !== null && backendData.khoanThu !== undefined) {
+    if (typeof backendData.khoanThu === 'object') {
+      khoanThu = backendData.khoanThu;
+    } else {
+      // If khoanThu is just the ID (a number), create a proper object
+      khoanThu = { id: backendData.khoanThu };
+    }
+  }
+  
+  // Explicitly check for khoan_thu_id in raw format (if khoanThu object is missing)
+  const rawFeeId = backendData.khoan_thu_id || backendData.khoanThuId;
+  if (rawFeeId && (!khoanThu.id)) {
+    khoanThu.id = rawFeeId;
+  }
   
   // Tạo đối tượng kết quả, cẩn thận xử lý các trường có thể null/undefined
   const result = {
     id: backendData.id,
     // Household data - try different possible field names
-    householdId: hoKhau.id || backendData.hoKhauId || null,
+    householdId: hoKhau.id || backendData.hoKhauId || backendData.ho_khau_id || null,
     householdOwnerName: hoKhau.chuHo || hoKhau.ownerName || '',
     householdAddress: hoKhau.diaChi || hoKhau.address || '',
     soHoKhau: hoKhau.soHoKhau || '',
-    // Fee data - try different possible field names
-    feeId: khoanThu.id || backendData.khoanThuId || null,
-    feeName: khoanThu.ten || khoanThu.tenKhoanThu || khoanThu.name || '',
+    // Fee data - try different possible field names - Always ensure we have the fee information
+    feeId: khoanThu.id || backendData.khoanThuId || backendData.khoan_thu_id || rawFeeId || null,
+    feeName: khoanThu.tenKhoanThu || khoanThu.ten || khoanThu.name || '',
     feeAmount: khoanThu.soTien || khoanThu.amount || 0,
     // Payment data
-    paymentDate: backendData.ngayNop,
-    payerName: backendData.nguoiNop || '',
-    amount: backendData.tongTien || 0,
-    amountPaid: backendData.soTien || 0,
-    verified: backendData.daXacNhan || false,
-    notes: backendData.ghiChu || ''
+    paymentDate: backendData.ngayNop || backendData.ngay_nop,
+    payerName: backendData.nguoiNop || backendData.nguoi_nop || '',
+    amount: backendData.tongTien || backendData.tong_tien || 0,
+    amountPaid: backendData.soTien || backendData.so_tien || 0,
+    verified: backendData.daXacNhan || backendData.da_xac_nhan || false,
+    notes: backendData.ghiChu || backendData.ghi_chu || ''
   };
   
-  console.log("Mapped frontend data:", JSON.stringify(result));
   return result;
 };
 
@@ -59,11 +69,32 @@ const mapToFrontendFormat = (backendData) => {
 export const getAllPayments = async (filters = {}) => {
   try {
     const response = await api.get('/payments', { params: filters });
-    console.log('Payment data from server:', JSON.stringify(response.data));
     
     // Map backend data to frontend format
     if (Array.isArray(response.data)) {
-      return response.data.map(payment => mapToFrontendFormat(payment));
+      // Create a distinct array of payments to ensure we don't lose duplicates with the same fee
+      const mappedPayments = response.data.map(payment => mapToFrontendFormat(payment));
+      
+      // Create a lookup table for fee IDs to fee names from the available data
+      const feeIdToNameMap = {};
+      mappedPayments.forEach(payment => {
+        if (payment.feeId && payment.feeName) {
+          feeIdToNameMap[payment.feeId] = payment.feeName;
+        }
+      });
+      
+      // Fill in missing fee names using our lookup table
+      const processedPayments = mappedPayments.map(payment => {
+        if (payment.feeId && !payment.feeName && feeIdToNameMap[payment.feeId]) {
+          return {
+            ...payment,
+            feeName: feeIdToNameMap[payment.feeId]
+          };
+        }
+        return payment;
+      });
+      
+      return processedPayments;
     }
     return [];
   } catch (error) {
@@ -76,7 +107,6 @@ export const getAllPayments = async (filters = {}) => {
 export const getPaymentById = async (id) => {
   try {
     const response = await api.get(`/payments/${id}`);
-    console.log(`Payment ${id} details:`, JSON.stringify(response.data));
     return mapToFrontendFormat(response.data);
   } catch (error) {
     console.error(`Error fetching payment with ID ${id}:`, error);
@@ -88,17 +118,10 @@ export const getPaymentById = async (id) => {
 export const createPayment = async (paymentData) => {
   try {
     const payload = mapToBackendFormat(paymentData);
-    
-    console.log('Creating payment with payload:', JSON.stringify(payload));
     const response = await api.post('/payments', payload);
-    console.log('Payment created successfully:', response.data);
     return mapToFrontendFormat(response.data);
   } catch (error) {
     console.error('Error creating payment:', error);
-    console.error('Payment payload that caused error:', JSON.stringify(paymentData));
-    if (error.response) {
-      console.error('Response error:', error.response.status, error.response.data);
-    }
     throw error;
   }
 };
@@ -203,6 +226,12 @@ export const getPaymentByHouseholdAndFee = async (householdId, feeId) => {
     const response = await api.get(`/payments/household/${householdId}/fee/${feeId}`);
     return mapToFrontendFormat(response.data);
   } catch (error) {
+    // Nếu lỗi là 404 (Not Found), có nghĩa là không tìm thấy khoản phí nào
+    // Trong trường hợp này, chúng ta nên trả về null thay vì ném ra lỗi
+    if (error.response && error.response.status === 404) {
+      console.log(`No payment found for household ${householdId} and fee ${feeId}`);
+      return null;
+    }
     console.error(`Get payment by household ${householdId} and fee ${feeId} error:`, error);
     throw error;
   }

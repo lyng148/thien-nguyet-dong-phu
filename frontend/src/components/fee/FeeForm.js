@@ -38,7 +38,7 @@ const FeeForm = () => {
     amount: '',
     dueDate: '',
     description: '',
-    active: admin, // Only set active to true by default if user is admin
+    active: admin, 
     ngayTao: formatDateForInput(new Date())
   });
   

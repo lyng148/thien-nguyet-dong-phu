@@ -26,40 +26,28 @@ import { isAdmin } from '../../utils/auth';
 
 const menuItems = [
   { 
-    text: 'Dashboard', 
+    text: 'Bảng điều khiển', 
     icon: <DashboardIcon />, 
     path: '/dashboard',
     adminOnly: false
   },
   { 
-    text: 'Households', 
+    text: 'Hộ khẩu', 
     icon: <PeopleIcon />, 
     path: '/households',
     adminOnly: false
   },
   { 
-    text: 'Fees', 
+    text: 'Khoản thu', 
     icon: <FeeIcon />, 
     path: '/fees',
     adminOnly: false
   },
   { 
-    text: 'Payments', 
+    text: 'Nộp phí', 
     icon: <ReceiptIcon />, 
     path: '/payments',
     adminOnly: false
-  },
-  { 
-    text: 'Statistics', 
-    icon: <StatisticsIcon />, 
-    path: '/statistics',
-    adminOnly: false
-  },
-  { 
-    text: 'User Management', 
-    icon: <UserManagementIcon />, 
-    path: '/users',
-    adminOnly: true
   },
   {
     text: 'Tạm trú/Tạm vắng',
@@ -72,6 +60,18 @@ const menuItems = [
     icon: <PersonIcon />,
     path: '/persons',
     adminOnly: false
+  },
+  { 
+    text: 'Thống kê', 
+    icon: <StatisticsIcon />, 
+    path: '/statistics',
+    adminOnly: false
+  },
+  { 
+    text: 'Quản lý User', 
+    icon: <UserManagementIcon />, 
+    path: '/users',
+    adminOnly: true
   }
 ];
 

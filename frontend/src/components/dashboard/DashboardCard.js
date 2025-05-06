@@ -76,4 +76,4 @@ const DashboardCard = ({
   );
 };
 
-export default DashboardCard; 
+export default DashboardCard;

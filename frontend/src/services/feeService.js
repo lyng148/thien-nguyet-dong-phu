@@ -87,7 +87,8 @@ export const updateFee = async (id, feeData) => {
 export const toggleFeeStatus = async (id, active) => {
   try {
     console.log(`Making API call to toggle fee ${id} to ${active ? 'active' : 'inactive'}`);
-    const response = await api.patch(`/fees/${id}/status`, { active: active });
+    // Fixed: Using the correct property name "hoatDong" instead of "active" to match the backend
+    const response = await api.patch(`/fees/${id}/status`, { hoatDong: active });
     console.log(`API response for fee toggle:`, response);
     return mapToFrontendFormat(response.data);
   } catch (error) {

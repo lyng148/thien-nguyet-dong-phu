@@ -104,13 +104,10 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, onLogout }) => {
                   {userData?.role || 'Role'}
                 </Typography>
               </Box>
-              <MenuItem onClick={handleClose}>
-                <AccountCircle sx={{ mr: 2 }} />
-                Profile
-              </MenuItem>
+              
               <MenuItem onClick={handleLogout}>
                 <ExitToApp sx={{ mr: 2 }} />
-                Logout
+                Dăng xuất 
               </MenuItem>
             </Menu>
           </Box>

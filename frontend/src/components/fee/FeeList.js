@@ -108,14 +108,25 @@ const FeeList = () => {
   const handleToggleStatus = async (id, currentStatus) => {
     try {
       console.log(`Toggling fee ${id} from ${currentStatus ? 'active' : 'inactive'} to ${!currentStatus ? 'active' : 'inactive'}`);
-      await toggleFeeStatus(id, !currentStatus);
+      
+      // Call the API to toggle the fee status
+      const newStatus = !currentStatus;
+      await toggleFeeStatus(id, newStatus);
+      
+      console.log(`Successfully toggled fee ${id} to ${newStatus ? 'active' : 'inactive'}`);
       
       // Update the fees state with the new status
       setFees(fees.map(fee => 
-        fee.id === id ? { ...fee, active: !currentStatus } : fee
+        fee.id === id ? { ...fee, active: newStatus } : fee
       ));
     } catch (error) {
       console.error(`Toggle fee status ${id} error:`, error);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      }
+      // Refresh the list to get the current state from the server
+      fetchFees();
     }
   };
 

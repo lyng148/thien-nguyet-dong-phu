@@ -106,10 +106,35 @@ const PaymentList = () => {
             verified: payment.verified,
             notes: payment.notes
           });
+
+          // Ensure fee name is present for all payments
+          if (!payment.feeName && payment.feeId) {
+            console.warn(`Payment ${payment.id} missing fee name for feeId ${payment.feeId}`);
+          }
         });
         
-        setPayments(data);
-        setTotal(data.length);
+        // Create a lookup of fee IDs to names from the available data
+        const feeIdToNameMap = {};
+        data.forEach(payment => {
+          if (payment.feeId && payment.feeName) {
+            feeIdToNameMap[payment.feeId] = payment.feeName;
+          }
+        });
+        
+        // Ensure all payments have fee names if the fee ID exists in our lookup map
+        const processedData = data.map(payment => {
+          if (!payment.feeName && payment.feeId && feeIdToNameMap[payment.feeId]) {
+            console.log(`Filling in missing fee name for payment ${payment.id} with fee ${payment.feeId}`);
+            return {
+              ...payment,
+              feeName: feeIdToNameMap[payment.feeId]
+            };
+          }
+          return payment;
+        });
+        
+        setPayments(processedData);
+        setTotal(processedData.length);
       } else {
         setPayments([]);
         setTotal(0);

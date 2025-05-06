@@ -200,4 +200,38 @@ public class NopPhiController {
         log.info("Payment statistics: {}", statistics);
         return ResponseEntity.ok(statistics);
     }
+
+    @GetMapping("/ho-khau/{hoKhauId}/khoan-thu/{khoanThuId}")
+    public ResponseEntity<?> getNopPhiByHoKhauAndKhoanThu(
+            @PathVariable Long hoKhauId, 
+            @PathVariable Long khoanThuId) {
+        log.info("Checking if ho khau with id: {} has paid for khoan thu with id: {}", hoKhauId, khoanThuId);
+        
+        try {
+            NopPhi payment = nopPhiService.findByHoKhauAndKhoanThu(hoKhauId, khoanThuId);
+            log.info("Found payment: {}", payment);
+            return ResponseEntity.ok(payment);
+        } catch (Exception e) {
+            // In case no payment is found, return 404 Not Found
+            log.info("No payment found for ho khau id: {} and khoan thu id: {}", hoKhauId, khoanThuId);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/household/{householdId}/fee/{feeId}")
+    public ResponseEntity<?> getPaymentByHouseholdAndFee(
+            @PathVariable Long householdId, 
+            @PathVariable Long feeId) {
+        log.info("Checking if household with id: {} has paid for fee with id: {}", householdId, feeId);
+        
+        try {
+            NopPhi payment = nopPhiService.findByHoKhauAndKhoanThu(householdId, feeId);
+            log.info("Found payment: {}", payment);
+            return ResponseEntity.ok(payment);
+        } catch (Exception e) {
+            // In case no payment is found, return 404 Not Found
+            log.info("No payment found for household id: {} and fee id: {}", householdId, feeId);
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

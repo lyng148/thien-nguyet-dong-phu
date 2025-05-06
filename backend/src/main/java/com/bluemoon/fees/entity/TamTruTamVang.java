@@ -33,7 +33,7 @@ public class TamTruTamVang {
     @Column(name = "noi_dung_de_nghi")
     private String noiDungDeNghi;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "nhan_khau_id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private NhanKhau nhanKhau;

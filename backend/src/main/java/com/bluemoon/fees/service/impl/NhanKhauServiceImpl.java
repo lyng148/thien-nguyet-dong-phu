@@ -3,6 +3,8 @@ package com.bluemoon.fees.service.impl;
 import com.bluemoon.fees.entity.NhanKhau;
 import com.bluemoon.fees.exception.ResourceNotFoundException;
 import com.bluemoon.fees.repository.NhanKhauRepository;
+import com.bluemoon.fees.repository.LichSuHoKhauRepository;
+import com.bluemoon.fees.repository.TamTruTamVangRepository;
 import com.bluemoon.fees.service.NhanKhauService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ import java.util.Optional;
 public class NhanKhauServiceImpl implements NhanKhauService {
 
     private final NhanKhauRepository nhanKhauRepository;
+    private final LichSuHoKhauRepository lichSuHoKhauRepository;
+    private final TamTruTamVangRepository tamTruTamVangRepository;
 
     @Override
     public NhanKhau save(NhanKhau entity) {
@@ -112,12 +116,22 @@ public class NhanKhauServiceImpl implements NhanKhauService {
         NhanKhau nhanKhau = findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Person not found with ID: " + id));
         
-        // Check if the person is part of a household
+        // Check if the person is part of a household and remove from household if needed
         if (nhanKhau.getHoKhau() != null) {
-            throw new IllegalStateException(
-                    "This person is part of a household. Remove them from the household first.");
+            nhanKhau.getHoKhau().removeNhanKhau(nhanKhau);
         }
         
+        // Delete related household history records
+        lichSuHoKhauRepository.findByNhanKhauId(id).forEach(lichSuHoKhau -> {
+            lichSuHoKhauRepository.delete(lichSuHoKhau);
+        });
+        
+        // Delete related temporary residence records
+        tamTruTamVangRepository.findByNhanKhauId(id).forEach(tamTruTamVang -> {
+            tamTruTamVangRepository.delete(tamTruTamVang);
+        });
+        
+        // Now it's safe to delete the person
         delete(nhanKhau);
     }
 }
