@@ -5,7 +5,7 @@ const mapToBackendFormat = (householdData) => {
   return {
     chuHo: householdData.ownerName,
     address: householdData.address,
-    soThanhVien: parseInt(householdData.numMembers, 10), // Đảm bảo chuyển đổi thành số nguyên
+    soThanhVien: 1, // Always set to 1 regardless of input
     soDienThoai: householdData.phoneNumber,
     email: householdData.email,
     hoatDong: householdData.active === true, // Đảm bảo chuyển đổi thành boolean

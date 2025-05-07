@@ -29,8 +29,8 @@ const HouseholdForm = () => {
   // Form state
   const [formData, setFormData] = useState({
     ownerName: '',
-    address: '',
-    numMembers: 1,
+    address: '', // Will be built from the address components when submitting
+    numMembers: 1, // Keeping this with default value of 1, but will hide from UI
     phoneNumber: '',
     email: '',
     active: admin, // Only set active to true by default if user is admin
@@ -113,9 +113,13 @@ const HouseholdForm = () => {
     setSaving(true);
     
     try {
+      // Construct address from components
+      const constructedAddress = `${formData.soNha}, ${formData.duong}, ${formData.phuong}, ${formData.quan}`;
+      
       // Make sure numMembers is an integer
       const householdData = {
         ...formData,
+        address: constructedAddress, // Set address to the constructed string
         numMembers: formData.numMembers ? parseInt(formData.numMembers, 10) : 1,
         active: admin ? formData.active : false // Force inactive if not admin
       };
@@ -235,20 +239,6 @@ const HouseholdForm = () => {
                 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Number of Members"
-                    name="numMembers"
-                    type="number"
-                    value={formData.numMembers}
-                    onChange={handleNumberChange}
-                    fullWidth
-                    required
-                    inputProps={{ min: 1 }}
-                    disabled={saving}
-                  />
-                </Grid>
-                
-                <Grid item xs={12} sm={6}>
-                  <TextField
                     label="Household Book Number"
                     name="soHoKhau"
                     value={formData.soHoKhau}
@@ -308,18 +298,6 @@ const HouseholdForm = () => {
               </Typography>
 
               <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Full Address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    fullWidth
-                    required
-                    disabled={saving}
-                  />
-                </Grid>
-                
                 <Grid item xs={12} md={3}>
                   <TextField
                     label="House Number"
@@ -327,6 +305,7 @@ const HouseholdForm = () => {
                     value={formData.soNha}
                     onChange={handleChange}
                     fullWidth
+                    required
                     disabled={saving}
                   />
                 </Grid>
@@ -338,6 +317,7 @@ const HouseholdForm = () => {
                     value={formData.duong}
                     onChange={handleChange}
                     fullWidth
+                    required
                     disabled={saving}
                   />
                 </Grid>
@@ -349,6 +329,7 @@ const HouseholdForm = () => {
                     value={formData.phuong}
                     onChange={handleChange}
                     fullWidth
+                    required
                     disabled={saving}
                   />
                 </Grid>
@@ -360,6 +341,7 @@ const HouseholdForm = () => {
                     value={formData.quan}
                     onChange={handleChange}
                     fullWidth
+                    required
                     disabled={saving}
                   />
                 </Grid>
