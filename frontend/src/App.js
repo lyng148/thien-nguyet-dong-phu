@@ -20,6 +20,7 @@ import Statistics from './components/statistics/Statistics';
 import UserList from './components/user/UserList';
 import HouseholdDetail from './components/household/HouseholdDetail';
 import PersonForm from './components/person/PersonForm';
+import TemporaryResidenceForm from './components/temporaryResidence/TemporaryResidenceForm';
 
 // Thêm import cho các component mới
 const TemporaryResidence = React.lazy(() => import('./components/temporaryResidence/TemporaryResidence'));
@@ -290,6 +291,22 @@ const App = () => {
               element={
                 isAuthenticated ? 
                 <PersonForm /> : 
+                <Navigate to="/login" replace />
+              }
+            />
+            <Route
+              path="/temporary-residence/add"
+              element={
+                isAuthenticated ? 
+                <TemporaryResidenceForm /> : 
+                <Navigate to="/login" replace />
+              }
+            />
+            <Route
+              path="/temporary-residence/edit/:id"
+              element={
+                isAuthenticated ? 
+                <TemporaryResidenceForm /> : 
                 <Navigate to="/login" replace />
               }
             />

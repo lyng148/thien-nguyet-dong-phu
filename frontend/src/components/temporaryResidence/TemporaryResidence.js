@@ -27,9 +27,7 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle,
-  Grid,
-  Alert
+  DialogTitle
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -43,20 +41,10 @@ import {
 import PageHeader from '../common/PageHeader';
 import {
   getAllTemporaryResidences,
-  createTemporaryResidence,
-  updateTemporaryResidence,
   deleteTemporaryResidence,
   getTemporaryResidenceByPerson
 } from '../../services/temporaryResidenceService';
 import { getAllPeople } from '../../services/personService';
-
-const initialForm = {
-  trangThai: '',
-  diaChiTamTruTamVang: '',
-  thoiGian: '',
-  noiDungDeNghi: '',
-  personId: ''
-};
 
 const TemporaryResidence = () => {
   const navigate = useNavigate();
@@ -69,10 +57,6 @@ const TemporaryResidence = () => {
   const [filterType, setFilterType] = useState('ALL');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState(null);
-  const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [form, setForm] = useState(initialForm);
-  const [editingId, setEditingId] = useState(null);
-  const [formError, setFormError] = useState('');
 
   // Load records function
   const fetchRecords = useCallback(async () => {
@@ -125,67 +109,12 @@ const TemporaryResidence = () => {
     }
   };
 
-  // Handle create/edit form
+  // Handle create/edit
   const handleOpenForm = (record = null) => {
     if (record) {
-      setForm({
-        trangThai: record.trangThai || '',
-        diaChiTamTruTamVang: record.diaChiTamTruTamVang || '',
-        thoiGian: record.thoiGian || '',
-        noiDungDeNghi: record.noiDungDeNghi || '',
-        personId: record.personId || ''
-      });
-      setEditingId(record.id);
+      navigate(`/temporary-residence/edit/${record.id}`);
     } else {
-      setForm(initialForm);
-      setEditingId(null);
-    }
-    setFormDialogOpen(true);
-  };
-
-  // Handle form close
-  const handleCloseForm = () => {
-    setFormDialogOpen(false);
-    setFormError('');
-  };
-
-  // Handle form change
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  // Handle form submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setFormError('');
-    
-    // Validate required fields
-    if (!form.trangThai || !form.diaChiTamTruTamVang || !form.thoiGian || !form.personId) {
-      setFormError('Vui lòng điền đầy đủ các trường bắt buộc');
-      return;
-    }
-
-    try {
-      console.log('Submitting form data:', form); // Log form data before submission
-      const submitData = {
-        trangThai: form.trangThai,
-        diaChiTamTruTamVang: form.diaChiTamTruTamVang,
-        thoiGian: form.thoiGian,
-        noiDungDeNghi: form.noiDungDeNghi || '',
-        personId: form.personId
-      };
-      console.log('Mapped backend data:', submitData); // Log backend data after mapping
-      
-      if (editingId) {
-        await updateTemporaryResidence(editingId, submitData);
-      } else {
-        await createTemporaryResidence(submitData);
-      }
-      handleCloseForm();
-      fetchRecords();
-    } catch (error) {
-      console.error('Submit error:', error);
-      setFormError('Không thể lưu thông tin tạm trú/tạm vắng. Chi tiết: ' + (error.message || ''));
+      navigate('/temporary-residence/add');
     }
   };
 
@@ -377,103 +306,6 @@ const TemporaryResidence = () => {
           )}
         </CardContent>
       </Card>
-      
-      {/* Form Dialog */}
-      <Dialog 
-        open={formDialogOpen} 
-        onClose={handleCloseForm}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>{editingId ? 'Sửa' : 'Thêm'} thông tin tạm trú/tạm vắng</DialogTitle>
-        <form onSubmit={handleSubmit}>
-          <DialogContent>
-            {formError && (
-              <Box mb={2}>
-                <Alert severity="error">{formError}</Alert>
-              </Box>
-            )}
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth margin="normal" required>
-                  <InputLabel>Trạng thái</InputLabel>
-                  <Select
-                    name="trangThai"
-                    value={form.trangThai}
-                    label="Trạng thái"
-                    onChange={handleChange}
-                  >
-                    <MenuItem value="TAM_TRU">Tạm trú</MenuItem>
-                    <MenuItem value="TAM_VANG">Tạm vắng</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Địa chỉ tạm trú/tạm vắng"
-                  name="diaChiTamTruTamVang"
-                  value={form.diaChiTamTruTamVang}
-                  onChange={handleChange}
-                  fullWidth
-                  required
-                  margin="normal"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Thời gian"
-                  name="thoiGian"
-                  type="date"
-                  value={form.thoiGian}
-                  onChange={handleChange}
-                  fullWidth
-                  required
-                  margin="normal"
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth margin="normal" required>
-                  <InputLabel>Nhân khẩu</InputLabel>
-                  <Select
-                    name="personId"
-                    value={form.personId}
-                    label="Nhân khẩu"
-                    onChange={handleChange}
-                  >
-                    <MenuItem value="">-- Chọn nhân khẩu --</MenuItem>
-                    {people.map(person => (
-                      <MenuItem key={person.id} value={person.id}>{person.fullName}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Nội dung đề nghị"
-                  name="noiDungDeNghi"
-                  value={form.noiDungDeNghi}
-                  onChange={handleChange}
-                  fullWidth
-                  margin="normal"
-                  multiline
-                  rows={2}
-                />
-              </Grid>
-            </Grid>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseForm}>Hủy</Button>
-            <Button 
-              type="submit" 
-              variant="contained" 
-              color="primary"
-            >
-              {editingId ? 'Cập nhật' : 'Thêm mới'}
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
       
       {/* Delete Confirmation Dialog */}
       <Dialog
