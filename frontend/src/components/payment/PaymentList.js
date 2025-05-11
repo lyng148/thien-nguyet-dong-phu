@@ -30,7 +30,9 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  Tabs,
+  Tab
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -38,13 +40,39 @@ import {
   Edit as EditIcon,
   CheckCircle as VerifiedIcon,
   Cancel as UnverifiedIcon,
-  Delete as DeleteIcon
+  Delete as DeleteIcon,
+  List as ListIcon,
+  Description as DescriptionIcon,
+  Home as HomeIcon
 } from '@mui/icons-material';
 
 import PageHeader from '../common/PageHeader';
 import { getAllPayments, verifyPayment, unverifyPayment, deletePayment } from '../../services/paymentService';
+import { getAllFees } from '../../services/feeService';
+import { getAllHouseholds } from '../../services/householdService';
 import { ROLE_ADMIN } from '../../config/constants';
 import { isAdmin as checkIsAdmin } from '../../utils/auth';
+
+// TabPanel component for handling tab content display
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`payment-tabpanel-${index}`}
+      aria-labelledby={`payment-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ pt: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
 
 const PaymentList = () => {
   const navigate = useNavigate();
@@ -52,7 +80,10 @@ const PaymentList = () => {
   // Get user role from auth utility
   const isAdmin = checkIsAdmin();
   
-  // State
+  // Tab state
+  const [tabValue, setTabValue] = useState(0);
+  
+  // State for all payments
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -63,6 +94,31 @@ const PaymentList = () => {
   const [total, setTotal] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [paymentToDelete, setPaymentToDelete] = useState(null);
+  
+  // State for fee tab
+  const [fees, setFees] = useState([]);
+  const [selectedFee, setSelectedFee] = useState('');
+  const [feePayments, setFeePayments] = useState([]);
+  const [feesLoading, setFeesLoading] = useState(false);
+  
+  // State for household tab
+  const [households, setHouseholds] = useState([]);
+  const [selectedHousehold, setSelectedHousehold] = useState('');
+  const [householdPayments, setHouseholdPayments] = useState([]);
+  const [householdsLoading, setHouseholdsLoading] = useState(false);
+
+  // Handle tab change
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+    
+    // Load data specific to each tab when first accessed
+    if (newValue === 1 && fees.length === 0) {
+      loadFees();
+    }
+    if (newValue === 2 && households.length === 0) {
+      loadHouseholds();
+    }
+  };
 
   // Load payments
   useEffect(() => {
@@ -154,6 +210,68 @@ const PaymentList = () => {
       setTotal(0);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // Load all fees
+  const loadFees = async () => {
+    try {
+      setFeesLoading(true);
+      const data = await getAllFees();
+      if (Array.isArray(data)) {
+        setFees(data);
+      } else {
+        setFees([]);
+      }
+    } catch (error) {
+      console.error('Error loading fees:', error);
+    } finally {
+      setFeesLoading(false);
+    }
+  };
+  
+  // Load all households
+  const loadHouseholds = async () => {
+    try {
+      setHouseholdsLoading(true);
+      const data = await getAllHouseholds();
+      if (Array.isArray(data)) {
+        setHouseholds(data);
+      } else {
+        setHouseholds([]);
+      }
+    } catch (error) {
+      console.error('Error loading households:', error);
+    } finally {
+      setHouseholdsLoading(false);
+    }
+  };
+  
+  // Handle fee selection
+  const handleFeeChange = (event) => {
+    const feeId = event.target.value;
+    setSelectedFee(feeId);
+    
+    if (feeId) {
+      // Filter payments for the selected fee
+      const feeSpecificPayments = payments.filter(payment => payment.feeId === feeId);
+      setFeePayments(feeSpecificPayments);
+    } else {
+      setFeePayments([]);
+    }
+  };
+  
+  // Handle household selection
+  const handleHouseholdChange = (event) => {
+    const householdId = event.target.value;
+    setSelectedHousehold(householdId);
+    
+    if (householdId) {
+      // Filter payments for the selected household
+      const householdSpecificPayments = payments.filter(payment => payment.householdId === householdId);
+      setHouseholdPayments(householdSpecificPayments);
+    } else {
+      setHouseholdPayments([]);
     }
   };
 
@@ -276,6 +394,108 @@ const PaymentList = () => {
     }).format(date);
   };
 
+  // Render payment table
+  const renderPaymentTable = (paymentsToShow) => (
+    <TableContainer component={Paper} elevation={0}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Household</TableCell>
+            <TableCell>Fee</TableCell>
+            <TableCell align="right">Amount</TableCell>
+            <TableCell>Payment Date</TableCell>
+            <TableCell>Verification</TableCell>
+            <TableCell>Notes</TableCell>
+            <TableCell align="right">Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {paymentsToShow.length > 0 ? (
+            paymentsToShow.map((payment) => (
+              <TableRow key={payment.id}>
+                <TableCell>
+                  <Typography variant="body2">{payment.householdOwnerName}</Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    {payment.householdAddress}
+                  </Typography>
+                </TableCell>
+                <TableCell>{payment.feeName}</TableCell>
+                <TableCell align="right">
+                  <Typography fontWeight="medium">
+                    {formatCurrency(payment.amount)}
+                  </Typography>
+                </TableCell>
+                <TableCell>{formatDate(payment.paymentDate)}</TableCell>
+                <TableCell>
+                  <Chip
+                    label={payment.verified ? "Verified" : "Unverified"}
+                    color={payment.verified ? "success" : "default"}
+                    size="small"
+                    icon={payment.verified ? <VerifiedIcon /> : <UnverifiedIcon />}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" noWrap style={{ maxWidth: '200px' }}>
+                    {payment.notes || '-'}
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  {isAdmin && (
+                    <>
+                      <Tooltip title={payment.verified ? "Mark as Unverified" : "Verify Payment"}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleToggleVerification(payment.id, payment.verified)}
+                          color={payment.verified ? "default" : "success"}
+                        >
+                          {payment.verified ? <UnverifiedIcon /> : <VerifiedIcon />}
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete Payment">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteDialogOpen(payment)}
+                          color="error"
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </>
+                  )}
+                  <Tooltip title="Edit Payment">
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEdit(payment.id)}
+                      sx={{ ml: 1 }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                <Typography variant="body1" color="textSecondary">
+                  No payments found matching your criteria
+                </Typography>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => navigate('/payments/add')}
+                  sx={{ mt: 2 }}
+                >
+                  Add Payment
+                </Button>
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
   return (
     <Box>
       <PageHeader 
@@ -292,177 +512,235 @@ const PaymentList = () => {
 
       <Card>
         <CardContent>
-          {/* Filters and Actions */}
-          <Grid container spacing={2} mb={3} alignItems="center">
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField
-                fullWidth
-                label="Search Payments"
-                value={searchTerm}
-                onChange={handleSearch}
-                placeholder="Search by household, fee, or notes"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <FormControl fullWidth>
-                <InputLabel id="verification-filter-label">Verification Status</InputLabel>
-                <Select
-                  labelId="verification-filter-label"
-                  id="verification-filter"
-                  value={verificationFilter}
-                  label="Verification Status"
-                  onChange={handleVerificationFilterChange}
+          {/* Tab Navigation */}
+          <Tabs 
+            value={tabValue} 
+            onChange={handleTabChange}
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+          >
+            <Tab icon={<ListIcon />} label="All Payments" />
+            <Tab icon={<DescriptionIcon />} label="By Fee" />
+            <Tab icon={<HomeIcon />} label="By Household" />
+          </Tabs>
+          
+          {/* Tab 1: All Payments */}
+          <TabPanel value={tabValue} index={0}>
+            {/* Filters and Actions */}
+            <Grid container spacing={2} mb={3} alignItems="center">
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  label="Search Payments"
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  placeholder="Search by household, fee, or notes"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth>
+                  <InputLabel id="verification-filter-label">Verification Status</InputLabel>
+                  <Select
+                    labelId="verification-filter-label"
+                    id="verification-filter"
+                    value={verificationFilter}
+                    label="Verification Status"
+                    onChange={handleVerificationFilterChange}
+                  >
+                    <MenuItem value="all">All Payments</MenuItem>
+                    <MenuItem value="verified">Verified Only</MenuItem>
+                    <MenuItem value="unverified">Unverified Only</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={5} display="flex" justifyContent="flex-end">
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => navigate('/payments/add')}
                 >
-                  <MenuItem value="all">All Payments</MenuItem>
-                  <MenuItem value="verified">Verified Only</MenuItem>
-                  <MenuItem value="unverified">Unverified Only</MenuItem>
+                  Add Payment
+                </Button>
+              </Grid>
+            </Grid>
+            
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+                <Button 
+                  size="small" 
+                  sx={{ ml: 2 }} 
+                  onClick={loadPayments}
+                >
+                  Retry
+                </Button>
+              </Alert>
+            )}
+
+            {loading ? (
+              <LinearProgress />
+            ) : (
+              <>
+                {renderPaymentTable(paginatedPayments)}
+                <TablePagination
+                  component="div"
+                  count={filteredPayments.length}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  rowsPerPage={rowsPerPage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  rowsPerPageOptions={[5, 10, 25]}
+                />
+              </>
+            )}
+          </TabPanel>
+          
+          {/* Tab 2: By Fee */}
+          <TabPanel value={tabValue} index={1}>
+            <Box sx={{ mb: 3 }}>
+              <FormControl fullWidth>
+                <InputLabel id="fee-select-label">Select Fee</InputLabel>
+                <Select
+                  labelId="fee-select-label"
+                  id="fee-select"
+                  value={selectedFee}
+                  label="Select Fee"
+                  onChange={handleFeeChange}
+                  displayEmpty
+                >
+                  <MenuItem value="">
+    
+                  </MenuItem>
+                  {fees.map((fee) => (
+                    <MenuItem key={fee.id} value={fee.id}>
+                      {fee.name} - {formatCurrency(fee.amount)}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12} md={5} display="flex" justifyContent="flex-end">
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => navigate('/payments/add')}
-              >
-                Add Payment
-              </Button>
-            </Grid>
-          </Grid>
+            </Box>
+            
+            {feesLoading ? (
+              <LinearProgress />
+            ) : selectedFee ? (
+              <>
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="h6">
+                    {fees.find(f => f.id === selectedFee)?.name} Payments
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Showing all payments for this fee
+                  </Typography>
+                </Box>
+                {renderPaymentTable(feePayments)}
+                
+                {/* Fee-specific stats */}
+                {feePayments.length > 0 && (
+                  <Box sx={{ mt: 3, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={4}>
+                        <Typography variant="body2" color="textSecondary">Total Households Paid</Typography>
+                        <Typography variant="h6">{feePayments.length}</Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <Typography variant="body2" color="textSecondary">Total Amount Collected</Typography>
+                        <Typography variant="h6">
+                          {formatCurrency(feePayments.reduce((sum, p) => sum + p.amount, 0))}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <Typography variant="body2" color="textSecondary">Verified Payments</Typography>
+                        <Typography variant="h6">
+                          {feePayments.filter(p => p.verified).length} of {feePayments.length}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
+              </>
+            ) : (
+              <Alert severity="info">
+                Please select a fee to view related payments
+              </Alert>
+            )}
+          </TabPanel>
           
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
-              <Button 
-                size="small" 
-                sx={{ ml: 2 }} 
-                onClick={loadPayments}
-              >
-                Retry
-              </Button>
-            </Alert>
-          )}
-
-          {loading ? (
-            <LinearProgress />
-          ) : (
-            <>
-              <TableContainer component={Paper} elevation={0}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Household</TableCell>
-                      <TableCell>Fee</TableCell>
-                      <TableCell align="right">Amount</TableCell>
-                      <TableCell>Payment Date</TableCell>
-                      <TableCell>Verification</TableCell>
-                      <TableCell>Notes</TableCell>
-                      <TableCell align="right">Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {paginatedPayments.length > 0 ? (
-                      paginatedPayments.map((payment) => (
-                        <TableRow key={payment.id}>
-                          <TableCell>
-                            <Typography variant="body2">{payment.householdOwnerName}</Typography>
-                            <Typography variant="caption" color="textSecondary">
-                              {payment.householdAddress}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>{payment.feeName}</TableCell>
-                          <TableCell align="right">
-                            <Typography fontWeight="medium">
-                              {formatCurrency(payment.amount)}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>{formatDate(payment.paymentDate)}</TableCell>
-                          <TableCell>
-                            <Chip
-                              label={payment.verified ? "Verified" : "Unverified"}
-                              color={payment.verified ? "success" : "default"}
-                              size="small"
-                              icon={payment.verified ? <VerifiedIcon /> : <UnverifiedIcon />}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2" noWrap style={{ maxWidth: '200px' }}>
-                              {payment.notes || '-'}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="right">
-                            {isAdmin && (
-                              <>
-                                <Tooltip title={payment.verified ? "Mark as Unverified" : "Verify Payment"}>
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => handleToggleVerification(payment.id, payment.verified)}
-                                    color={payment.verified ? "default" : "success"}
-                                  >
-                                    {payment.verified ? <UnverifiedIcon /> : <VerifiedIcon />}
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Delete Payment">
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => handleDeleteDialogOpen(payment)}
-                                    color="error"
-                                  >
-                                    <DeleteIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                              </>
-                            )}
-                            <Tooltip title="Edit Payment">
-                              <IconButton
-                                size="small"
-                                onClick={() => handleEdit(payment.id)}
-                                sx={{ ml: 1 }}
-                              >
-                                <EditIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
-                          <Typography variant="body1" color="textSecondary">
-                            No payments found matching your criteria
-                          </Typography>
-                          <Button
-                            variant="contained"
-                            startIcon={<AddIcon />}
-                            onClick={() => navigate('/payments/add')}
-                            sx={{ mt: 2 }}
-                          >
-                            Add Payment
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <TablePagination
-                component="div"
-                count={filteredPayments.length}
-                page={page}
-                onPageChange={handleChangePage}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                rowsPerPageOptions={[5, 10, 25]}
-              />
-            </>
-          )}
+          {/* Tab 3: By Household */}
+          <TabPanel value={tabValue} index={2}>
+            <Box sx={{ mb: 3 }}>
+              <FormControl fullWidth>
+                <InputLabel id="household-select-label">Select Household</InputLabel>
+                <Select
+                  labelId="household-select-label"
+                  id="household-select"
+                  value={selectedHousehold}
+                  label="Select Household"
+                  onChange={handleHouseholdChange}
+                  displayEmpty
+                >
+                  <MenuItem value="">
+            
+                  </MenuItem>
+                  {households.map((household) => (
+                    <MenuItem key={household.id} value={household.id}>
+                      {household.soHoKhau || 'N/A'} - {household.chuHo || household.ownerName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+            
+            {householdsLoading ? (
+              <LinearProgress />
+            ) : selectedHousehold ? (
+              <>
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="h6">
+                    {households.find(h => h.id === selectedHousehold)?.ownerName}'s Payments
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Showing all payments made by this household
+                  </Typography>
+                </Box>
+                {renderPaymentTable(householdPayments)}
+                
+                {/* Household-specific stats */}
+                {householdPayments.length > 0 && (
+                  <Box sx={{ mt: 3, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={4}>
+                        <Typography variant="body2" color="textSecondary">Total Fees Paid</Typography>
+                        <Typography variant="h6">{householdPayments.length}</Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <Typography variant="body2" color="textSecondary">Total Amount Paid</Typography>
+                        <Typography variant="h6">
+                          {formatCurrency(householdPayments.reduce((sum, p) => sum + p.amount, 0))}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <Typography variant="body2" color="textSecondary">Last Payment</Typography>
+                        <Typography variant="h6">
+                          {formatDate(householdPayments.sort((a, b) => 
+                            new Date(b.paymentDate) - new Date(a.paymentDate))[0]?.paymentDate)}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
+              </>
+            ) : (
+              <Alert severity="info">
+                Please select a household to view their payments
+              </Alert>
+            )}
+          </TabPanel>
         </CardContent>
       </Card>
 
