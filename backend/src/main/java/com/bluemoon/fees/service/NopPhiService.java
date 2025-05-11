@@ -3,6 +3,7 @@ package com.bluemoon.fees.service;
 import com.bluemoon.fees.entity.NopPhi;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public interface NopPhiService extends BaseService<NopPhi, Long> {
     List<NopPhi> findByHoKhau(Long hoKhauId);
@@ -18,4 +19,5 @@ public interface NopPhiService extends BaseService<NopPhi, Long> {
     Double calculateTotalPaymentsByHoKhau(Long hoKhauId);
     Double calculateTotalPaymentsByKhoanThu(Long khoanThuId);
     Double calculateTotalPaymentsByDateRange(LocalDate startDate, LocalDate endDate);
+    List<Map<String, Object>> getHouseholdsPaidForFee(Long khoanThuId);
 }

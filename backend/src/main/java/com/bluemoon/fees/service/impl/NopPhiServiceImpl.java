@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -182,5 +185,28 @@ public class NopPhiServiceImpl implements NopPhiService {
                 .filter(NopPhi::isDaXacNhan)
                 .mapToDouble(NopPhi::getSoTien)
                 .sum();
+    }
+
+    @Override
+    public List<Map<String, Object>> getHouseholdsPaidForFee(Long khoanThuId) {
+        // Get all payments for this fee
+        List<NopPhi> payments = findByKhoanThu(khoanThuId);
+        
+        // Filter only verified payments and map to a more useful format
+        return payments.stream()
+                .filter(NopPhi::isDaXacNhan)
+                .map(payment -> {
+                    Map<String, Object> householdInfo = new HashMap<>();
+                    householdInfo.put("paymentId", payment.getId());
+                    householdInfo.put("householdId", payment.getHoKhau().getId());
+                    householdInfo.put("soHoKhau", payment.getHoKhau().getSoHoKhau());
+                    householdInfo.put("ownerName", payment.getHoKhau().getChuHo());
+                    householdInfo.put("address", payment.getHoKhau().getAddress());
+                    householdInfo.put("paymentDate", payment.getNgayNop());
+                    householdInfo.put("amount", payment.getSoTien());
+                    householdInfo.put("notes", payment.getGhiChu());
+                    return householdInfo;
+                })
+                .collect(Collectors.toList());
     }
 }

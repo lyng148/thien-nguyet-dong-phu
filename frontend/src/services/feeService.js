@@ -151,3 +151,14 @@ export const getFeesByType = async (type) => {
     throw error;
   }
 };
+
+// Get households that have paid for a fee
+export const getHouseholdsPaidForFee = async (id) => {
+  try {
+    const response = await api.get(`/fees/${id}/paid-households`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching paid households for fee with ID ${id}:`, error);
+    throw error;
+  }
+};

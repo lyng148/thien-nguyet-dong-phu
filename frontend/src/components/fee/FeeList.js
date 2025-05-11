@@ -36,7 +36,8 @@ import {
   Delete as DeleteIcon,
   CheckCircle as ActiveIcon,
   Cancel as InactiveIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
+  Visibility as VisibilityIcon
 } from '@mui/icons-material';
 
 import PageHeader from '../common/PageHeader';
@@ -317,6 +318,15 @@ const FeeList = () => {
                             />
                           </TableCell>
                           <TableCell align="right">
+                            <Tooltip title="View Details">
+                              <IconButton
+                                size="small"
+                                onClick={() => navigate(`/fees/detail/${fee.id}`)}
+                                sx={{ mr: 1 }}
+                              >
+                                <VisibilityIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
                             <Tooltip title="Edit">
                               <IconButton
                                 size="small"

@@ -3,8 +3,7 @@ CODE XONG HÉT CHỨC NĂNG RỒI PHÂN QUYỀN SAU
 - fix sua nhan khau bi loi
 - api tim kiem tam tru/ tam vang theo nhan khau
 
-- Khi ấn vào xem thông tin chi tiết của khỏan thu, xem đươc những hộ khẩu nào đa đóng
-khoản phi tự nguyện thì không cố định giá tiền (sự tùy tâm)
+- Khi ấn vào xem thông tin chi tiết của khỏan thu, xem đươc những hộ khẩu nào đa đóng, tổng số hộ đã đóng 
 - Cán bộ kế toán cũng cần thống kê tổng số tiền đã thu trong mỗi đợt, tổng số hộ
 đã nộp và có thể xem chi tiết mỗi hộ đã nộp những khoản tiền nào.
 => có 2 tab, một tab hiển thị theo khoản thu, một tab hiển thị theo hộ khẩu

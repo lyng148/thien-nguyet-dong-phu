@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/fees") // Keep original endpoint path
@@ -109,5 +110,29 @@ public class KhoanThuController {
         );
         
         return ResponseEntity.ok(statistics);
+    }
+
+    @GetMapping("/{id}/paid-households")
+    public ResponseEntity<Map<String, Object>> getHouseholdsPaidForFee(@PathVariable Long id) {
+        // Ensure the khoanThu exists
+        KhoanThu khoanThu = khoanThuService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Khoan thu not found with id: " + id));
+        
+        // Get households that have paid
+        List<Map<String, Object>> paidHouseholds = nopPhiService.getHouseholdsPaidForFee(id);
+        
+        // Get statistics
+        double totalCollected = nopPhiService.calculateTotalPaymentsByKhoanThu(id);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("feeId", khoanThu.getId());
+        response.put("feeName", khoanThu.getTenKhoanThu());
+        response.put("feeAmount", khoanThu.getSoTien());
+        response.put("dueDate", khoanThu.getThoiHan());
+        response.put("totalCollected", totalCollected);
+        response.put("totalPaidHouseholds", paidHouseholds.size());
+        response.put("paidHouseholds", paidHouseholds);
+        
+        return ResponseEntity.ok(response);
     }
 }

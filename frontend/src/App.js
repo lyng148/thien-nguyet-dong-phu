@@ -14,6 +14,7 @@ import HouseholdList from './components/household/HouseholdList';
 import HouseholdForm from './components/household/HouseholdForm';
 import FeeList from './components/fee/FeeList';
 import FeeForm from './components/fee/FeeForm';
+import FeeDetail from './components/fee/FeeDetail';
 import PaymentList from './components/payment/PaymentList';
 import PaymentForm from './components/payment/PaymentForm';
 import Statistics from './components/statistics/Statistics';
@@ -199,6 +200,14 @@ const App = () => {
               element={
                 isAuthenticated ? 
                 <FeeForm /> : 
+                <Navigate to="/login" replace />
+              } 
+            />
+            <Route 
+              path="/fees/detail/:id" 
+              element={
+                isAuthenticated ? 
+                <FeeDetail /> : 
                 <Navigate to="/login" replace />
               } 
             />
