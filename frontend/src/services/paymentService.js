@@ -41,11 +41,17 @@ const mapToFrontendFormat = (backendData) => {
     khoanThu.id = rawFeeId;
   }
   
+  // Debug the household data
+  console.log('Processing payment:', backendData.id, 'Household data:', JSON.stringify(hoKhau));
+  
+  // Extract household ID safely, ensuring we get a value even if the structure is unexpected
+  const householdId = hoKhau.id || backendData.hoKhauId || backendData.ho_khau_id || null;
+  
   // Tạo đối tượng kết quả, cẩn thận xử lý các trường có thể null/undefined
   const result = {
     id: backendData.id,
     // Household data - try different possible field names
-    householdId: hoKhau.id || backendData.hoKhauId || backendData.ho_khau_id || null,
+    householdId: householdId,
     householdOwnerName: hoKhau.chuHo || hoKhau.ownerName || '',
     householdAddress: hoKhau.diaChi || hoKhau.address || '',
     soHoKhau: hoKhau.soHoKhau || '',
@@ -62,6 +68,10 @@ const mapToFrontendFormat = (backendData) => {
     notes: backendData.ghiChu || backendData.ghi_chu || ''
   };
   
+  if (householdId && (!result.householdOwnerName || !result.householdAddress)) {
+    console.warn(`Payment ${backendData.id} has household ID ${householdId} but missing household details`);
+  }
+  
   return result;
 };
 
@@ -72,8 +82,29 @@ export const getAllPayments = async (filters = {}) => {
     
     // Map backend data to frontend format
     if (Array.isArray(response.data)) {
-      // Create a distinct array of payments to ensure we don't lose duplicates with the same fee
-      const mappedPayments = response.data.map(payment => mapToFrontendFormat(payment));
+      // First create a map of household IDs to household objects to handle JSON reference serialization
+      const householdMap = {};
+      
+      // First pass: extract all household data from payments that have complete household objects
+      response.data.forEach(payment => {
+        if (payment.hoKhau && typeof payment.hoKhau === 'object' && payment.hoKhau.id) {
+          // Store the complete household object for later use
+          householdMap[payment.hoKhau.id] = payment.hoKhau;
+        }
+      });
+      
+      console.log("Extracted household map:", householdMap);
+      
+      // Second pass: process all payments, replacing household IDs with full objects when needed
+      const mappedPayments = response.data.map(payment => {
+        // If the hoKhau is just an ID (number), replace it with the full object from our map
+        if (payment.hoKhau && typeof payment.hoKhau === 'number' && householdMap[payment.hoKhau]) {
+          console.log(`Replacing household ID ${payment.hoKhau} with full object for payment ID ${payment.id}`);
+          payment.hoKhau = householdMap[payment.hoKhau];
+        }
+        
+        return mapToFrontendFormat(payment);
+      });
       
       // Create a lookup table for fee IDs to fee names from the available data
       const feeIdToNameMap = {};
@@ -83,15 +114,36 @@ export const getAllPayments = async (filters = {}) => {
         }
       });
       
-      // Fill in missing fee names using our lookup table
-      const processedPayments = mappedPayments.map(payment => {
-        if (payment.feeId && !payment.feeName && feeIdToNameMap[payment.feeId]) {
-          return {
-            ...payment,
-            feeName: feeIdToNameMap[payment.feeId]
+      // Create a lookup table for household IDs to household information
+      const householdInfoMap = {};
+      mappedPayments.forEach(payment => {
+        if (payment.householdId && payment.householdOwnerName) {
+          householdInfoMap[payment.householdId] = {
+            ownerName: payment.householdOwnerName,
+            address: payment.householdAddress,
+            soHoKhau: payment.soHoKhau
           };
         }
-        return payment;
+      });
+      
+      // Fill in missing fee names and household information using our lookup tables
+      const processedPayments = mappedPayments.map(payment => {
+        let updatedPayment = {...payment};
+        
+        // Fill in missing fee names
+        if (payment.feeId && !payment.feeName && feeIdToNameMap[payment.feeId]) {
+          updatedPayment.feeName = feeIdToNameMap[payment.feeId];
+        }
+        
+        // Fill in missing household information
+        if (payment.householdId && (!payment.householdOwnerName || !payment.householdAddress) && 
+            householdInfoMap[payment.householdId]) {
+          updatedPayment.householdOwnerName = householdInfoMap[payment.householdId].ownerName;
+          updatedPayment.householdAddress = householdInfoMap[payment.householdId].address;
+          updatedPayment.soHoKhau = householdInfoMap[payment.householdId].soHoKhau;
+        }
+        
+        return updatedPayment;
       });
       
       return processedPayments;

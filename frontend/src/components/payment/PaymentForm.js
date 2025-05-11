@@ -206,7 +206,7 @@ const PaymentForm = () => {
       return;
     }
     
-    if (!formData.amount || formData.amount <= 0) {
+    if (formData.amount === '' || formData.amount < 0) {
       setError('Please enter a valid payment amount');
       return;
     }

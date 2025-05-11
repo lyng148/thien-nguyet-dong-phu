@@ -106,7 +106,7 @@ const FeeForm = () => {
     
     try {
       // Validate form data
-      if (!formData.name || !formData.amount || !formData.dueDate) {
+      if (!formData.name || formData.amount === '' || !formData.dueDate) {
         throw new Error('Please fill all required fields');
       }
 

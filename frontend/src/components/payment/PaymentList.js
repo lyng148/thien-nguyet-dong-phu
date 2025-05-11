@@ -87,31 +87,21 @@ const PaymentList = () => {
       console.log("Payment data received:", data);
       
       if (Array.isArray(data)) {
-        // Debug each payment's household and fee data using the DTO format
+        // Create a lookup of household IDs to household information
+        const householdIdToInfoMap = {};
+        
+        // First pass - collect all available household information
         data.forEach(payment => {
-          console.log(`Payment ${payment.id} details:`, {
-            household: {
-              id: payment.householdId,
-              ownerName: payment.householdOwnerName,
-              address: payment.householdAddress
-            },
-            fee: {
-              id: payment.feeId,
-              name: payment.feeName,
-              amount: payment.feeAmount
-            },
-            amount: payment.amount,
-            amountPaid: payment.amountPaid,
-            date: payment.paymentDate,
-            verified: payment.verified,
-            notes: payment.notes
-          });
-
-          // Ensure fee name is present for all payments
-          if (!payment.feeName && payment.feeId) {
-            console.warn(`Payment ${payment.id} missing fee name for feeId ${payment.feeId}`);
+          if (payment.householdId && (payment.householdOwnerName || payment.householdAddress)) {
+            householdIdToInfoMap[payment.householdId] = {
+              ownerName: payment.householdOwnerName || '',
+              address: payment.householdAddress || '',
+              soHoKhau: payment.soHoKhau || ''
+            };
           }
         });
+        
+        console.log("Household lookup map:", householdIdToInfoMap);
         
         // Create a lookup of fee IDs to names from the available data
         const feeIdToNameMap = {};
@@ -121,16 +111,33 @@ const PaymentList = () => {
           }
         });
         
-        // Ensure all payments have fee names if the fee ID exists in our lookup map
+        // Second pass - ensure all payments have household information if the household ID exists in our lookup
         const processedData = data.map(payment => {
+          let updatedPayment = {...payment};
+          
+          // Fill in missing fee names
           if (!payment.feeName && payment.feeId && feeIdToNameMap[payment.feeId]) {
             console.log(`Filling in missing fee name for payment ${payment.id} with fee ${payment.feeId}`);
-            return {
-              ...payment,
-              feeName: feeIdToNameMap[payment.feeId]
-            };
+            updatedPayment.feeName = feeIdToNameMap[payment.feeId];
           }
-          return payment;
+          
+          // Fill in missing household information
+          if (payment.householdId && householdIdToInfoMap[payment.householdId]) {
+            // Always use the information from our lookup to ensure consistency
+            const householdInfo = householdIdToInfoMap[payment.householdId];
+            
+            // Check if there's missing information that we can fill in
+            if (!payment.householdOwnerName || !payment.householdAddress) {
+              console.log(`Filling in missing household info for payment ${payment.id} with household ${payment.householdId}`);
+            }
+            
+            // Always use the lookup data for consistency
+            updatedPayment.householdOwnerName = householdInfo.ownerName;
+            updatedPayment.householdAddress = householdInfo.address;
+            updatedPayment.soHoKhau = householdInfo.soHoKhau;
+          }
+          
+          return updatedPayment;
         });
         
         setPayments(processedData);
