@@ -56,21 +56,26 @@ const PersonForm = () => {
           setLoading(true);
           const data = await getPersonById(id);
           
-          setFormData({
-            hoTen: data.hoTen || '',
-            ngaySinh: data.ngaySinh ? formatDateForInput(data.ngaySinh) : '',
-            gioiTinh: data.gioiTinh || '',
-            danToc: data.danToc || '',
-            tonGiao: data.tonGiao || '',
-            cccd: data.cccd || '',
-            ngayCap: data.ngayCap ? formatDateForInput(data.ngayCap) : '',
-            noiCap: data.noiCap || '',
-            ngheNghiep: data.ngheNghiep || '',
-            ghiChu: data.ghiChu || ''
-          });
+          if (data) {
+            console.log("Received person data:", data);
+            setFormData({
+              hoTen: data.hoTen || '',
+              ngaySinh: data.ngaySinh ? formatDateForInput(data.ngaySinh) : '',
+              gioiTinh: data.gioiTinh || '',
+              danToc: data.danToc || '',
+              tonGiao: data.tonGiao || '',
+              cccd: data.cccd || '',
+              ngayCap: data.ngayCap ? formatDateForInput(data.ngayCap) : '',
+              noiCap: data.noiCap || '',
+              ngheNghiep: data.ngheNghiep || '',
+              ghiChu: data.ghiChu || ''
+            });
+          } else {
+            setError('Không tìm thấy thông tin nhân khẩu.');
+          }
         } catch (err) {
           console.error('Error fetching person:', err);
-          setError('Error loading person data. Please try again.');
+          setError('Lỗi khi tải thông tin nhân khẩu. Vui lòng thử lại.');
         } finally {
           setLoading(false);
         }
@@ -116,6 +121,8 @@ const PersonForm = () => {
         ghiChu: formData.ghiChu
       };
       
+      console.log('Submitting person data:', personData);
+      
       let result;
       if (isEdit) {
         result = await updatePerson(id, personData);
@@ -134,7 +141,7 @@ const PersonForm = () => {
       
     } catch (err) {
       console.error('Save person error:', err);
-      setError(err.message || err.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin nhân khẩu');
+      setError(err.message || (err.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin nhân khẩu'));
     } finally {
       setSaving(false);
     }
@@ -144,27 +151,38 @@ const PersonForm = () => {
   function formatDateForInput(dateValue) {
     if (!dateValue) return '';
     
-    // Handle different date formats
-    let date;
-    if (typeof dateValue === 'string') {
-      if (dateValue.includes('T')) {
-        // ISO format
-        date = new Date(dateValue);
+    try {
+      // Handle different date formats
+      let date;
+      if (typeof dateValue === 'string') {
+        if (dateValue.includes('T')) {
+          // ISO format
+          date = new Date(dateValue);
+        } else {
+          // Simple YYYY-MM-DD format
+          date = new Date(dateValue);
+        }
       } else {
-        // Simple YYYY-MM-DD format
         date = new Date(dateValue);
       }
-    } else {
-      date = new Date(dateValue);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.error('Invalid date value:', dateValue);
+        return '';
+      }
+      
+      // Get year, month, and day
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      // Return in YYYY-MM-DD format
+      return `${year}-${month}-${day}`;
+    } catch (error) {
+      console.error('Error formatting date:', error, dateValue);
+      return '';
     }
-    
-    // Get year, month, and day
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    
-    // Return in YYYY-MM-DD format
-    return `${year}-${month}-${day}`;
   }
 
   return (

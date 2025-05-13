@@ -4,17 +4,18 @@ import api from './api';
 const mapToBackendFormat = (personData) => {
   // Map only the fields that match the backend entity
   return {
-    hoTen: personData.hoTen,
-    ngaySinh: personData.ngaySinh,
-    gioiTinh: personData.gioiTinh,
-    danToc: personData.danToc,
-    tonGiao: personData.tonGiao,
-    cccd: personData.cccd,
-    ngayCap: personData.ngayCap,
-    noiCap: personData.noiCap,
-    ngheNghiep: personData.ngheNghiep,
-    ghiChu: personData.ghiChu
-    // quanHeVoiChuHo, hoKhau sẽ thêm sau khi cần
+    hoTen: personData.hoTen || personData.fullName,
+    ngaySinh: personData.ngaySinh || personData.dateOfBirth,
+    gioiTinh: personData.gioiTinh || personData.gender,
+    danToc: personData.danToc || personData.ethnicity,
+    tonGiao: personData.tonGiao || personData.religion,
+    cccd: personData.cccd || personData.idCardNumber,
+    ngayCap: personData.ngayCap || personData.idCardIssueDate,
+    noiCap: personData.noiCap || personData.idCardIssuePlace,
+    ngheNghiep: personData.ngheNghiep || personData.occupation,
+    ghiChu: personData.ghiChu || personData.notes,
+    quanHeVoiChuHo: personData.quanHeVoiChuHo || personData.relationshipWithOwner
+    // Other fields will be preserved if already present in the personData
   };
 };
 
@@ -24,24 +25,31 @@ const mapToFrontendFormat = (backendData) => {
   
   return {
     id: backendData.id,
+    hoTen: backendData.hoTen,
     fullName: backendData.hoTen,
-    nickname: backendData.biDanh,
+    ngaySinh: backendData.ngaySinh,
     dateOfBirth: backendData.ngaySinh,
+    gioiTinh: backendData.gioiTinh,
     gender: backendData.gioiTinh,
-    placeOfBirth: backendData.noiSinh,
-    placeOfOrigin: backendData.nguyenQuan,
-    currentAddress: backendData.diaChiHienNay,
-    idCardNumber: backendData.soCMT,
-    idCardIssueDate: backendData.ngayCap,
-    idCardIssuePlace: backendData.noiCap,
+    danToc: backendData.danToc,
     ethnicity: backendData.danToc,
+    tonGiao: backendData.tonGiao,
     religion: backendData.tonGiao,
-    nationality: backendData.quocTich,
+    cccd: backendData.cccd,
+    idCardNumber: backendData.cccd,
+    ngayCap: backendData.ngayCap,
+    idCardIssueDate: backendData.ngayCap,
+    noiCap: backendData.noiCap,
+    idCardIssuePlace: backendData.noiCap,
+    ngheNghiep: backendData.ngheNghiep,
     occupation: backendData.ngheNghiep,
-    workPlace: backendData.noiLamViec,
-    status: backendData.trangThai,
+    ghiChu: backendData.ghiChu,
+    notes: backendData.ghiChu,
+    hoKhauId: backendData.hoKhauId,
     householdId: backendData.hoKhauId,
-    relationshipWithOwner: backendData.quanHeVoiChuHo
+    quanHeVoiChuHo: backendData.quanHeVoiChuHo,
+    relationshipWithOwner: backendData.quanHeVoiChuHo,
+    soHoKhau: backendData.soHoKhau
   };
 };
 
@@ -87,6 +95,7 @@ export const createPerson = async (personData) => {
 export const updatePerson = async (id, personData) => {
   try {
     const mappedData = mapToBackendFormat(personData);
+    console.log('Updating person with data:', mappedData);
     const response = await api.put(`/persons/${id}`, mappedData);
     return mapToFrontendFormat(response.data);
   } catch (error) {

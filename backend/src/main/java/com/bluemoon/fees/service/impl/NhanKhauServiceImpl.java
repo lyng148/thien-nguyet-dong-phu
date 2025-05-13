@@ -7,16 +7,18 @@ import com.bluemoon.fees.repository.LichSuHoKhauRepository;
 import com.bluemoon.fees.repository.TamTruTamVangRepository;
 import com.bluemoon.fees.service.NhanKhauService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Slf4j
 public class NhanKhauServiceImpl implements NhanKhauService {
 
     private final NhanKhauRepository nhanKhauRepository;
@@ -80,58 +82,84 @@ public class NhanKhauServiceImpl implements NhanKhauService {
     }
 
     @Override
+    @Transactional
     public NhanKhau createNhanKhau(NhanKhau nhanKhau) {
-        // Set default values if needed
         if (nhanKhau.getNgayThemNhanKhau() == null) {
             nhanKhau.setNgayThemNhanKhau(LocalDate.now());
         }
-        
         return nhanKhauRepository.save(nhanKhau);
     }
 
     @Override
-    public NhanKhau updateNhanKhau(Long id, NhanKhau nhanKhau) {
-        NhanKhau existingNhanKhau = findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Person not found with ID: " + id));
+    @Transactional
+    public NhanKhau updateNhanKhau(Long id, NhanKhau nhanKhauRequest) {
+        log.info("Updating person with id: {}", id);
         
-        // Update fields
-        existingNhanKhau.setHoTen(nhanKhau.getHoTen());
-        existingNhanKhau.setNgaySinh(nhanKhau.getNgaySinh());
-        existingNhanKhau.setGioiTinh(nhanKhau.getGioiTinh());
-        existingNhanKhau.setDanToc(nhanKhau.getDanToc());
-        existingNhanKhau.setTonGiao(nhanKhau.getTonGiao());
-        existingNhanKhau.setCccd(nhanKhau.getCccd());
-        existingNhanKhau.setNgayCap(nhanKhau.getNgayCap());
-        existingNhanKhau.setNoiCap(nhanKhau.getNoiCap());
-        existingNhanKhau.setNgheNghiep(nhanKhau.getNgheNghiep());
-        existingNhanKhau.setGhiChu(nhanKhau.getGhiChu());
+        NhanKhau existingNhanKhau = nhanKhauRepository.findById(id)
+            .orElseThrow(() -> {
+                log.error("Person with id {} not found", id);
+                return new EntityNotFoundException("Không tìm thấy nhân khẩu với ID: " + id);
+            });
         
-        // Don't update HoKhau and QuanHeVoiChuHo here - that should be managed through HoKhauService
+        // Only update fields that are provided (not null)
+        if (nhanKhauRequest.getHoTen() != null) {
+            existingNhanKhau.setHoTen(nhanKhauRequest.getHoTen());
+        }
         
+        if (nhanKhauRequest.getNgaySinh() != null) {
+            existingNhanKhau.setNgaySinh(nhanKhauRequest.getNgaySinh());
+        }
+        
+        if (nhanKhauRequest.getGioiTinh() != null) {
+            existingNhanKhau.setGioiTinh(nhanKhauRequest.getGioiTinh());
+        }
+        
+        if (nhanKhauRequest.getDanToc() != null) {
+            existingNhanKhau.setDanToc(nhanKhauRequest.getDanToc());
+        }
+        
+        if (nhanKhauRequest.getTonGiao() != null) {
+            existingNhanKhau.setTonGiao(nhanKhauRequest.getTonGiao());
+        }
+        
+        if (nhanKhauRequest.getCccd() != null) {
+            existingNhanKhau.setCccd(nhanKhauRequest.getCccd());
+        }
+        
+        if (nhanKhauRequest.getNgayCap() != null) {
+            existingNhanKhau.setNgayCap(nhanKhauRequest.getNgayCap());
+        }
+        
+        if (nhanKhauRequest.getNoiCap() != null) {
+            existingNhanKhau.setNoiCap(nhanKhauRequest.getNoiCap());
+        }
+        
+        if (nhanKhauRequest.getNgheNghiep() != null) {
+            existingNhanKhau.setNgheNghiep(nhanKhauRequest.getNgheNghiep());
+        }
+        
+        if (nhanKhauRequest.getGhiChu() != null) {
+            existingNhanKhau.setGhiChu(nhanKhauRequest.getGhiChu());
+        }
+        
+        if (nhanKhauRequest.getHoKhau() != null) {
+            existingNhanKhau.setHoKhau(nhanKhauRequest.getHoKhau());
+        }
+        
+        if (nhanKhauRequest.getQuanHeVoiChuHo() != null) {
+            existingNhanKhau.setQuanHeVoiChuHo(nhanKhauRequest.getQuanHeVoiChuHo());
+        }
+        
+        log.info("Saving updated person: {}", existingNhanKhau);
         return nhanKhauRepository.save(existingNhanKhau);
     }
 
     @Override
+    @Transactional
     public void deleteNhanKhau(Long id) {
-        NhanKhau nhanKhau = findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Person not found with ID: " + id));
-        
-        // Check if the person is part of a household and remove from household if needed
-        if (nhanKhau.getHoKhau() != null) {
-            nhanKhau.getHoKhau().removeNhanKhau(nhanKhau);
-        }
-        
-        // Delete related household history records
-        lichSuHoKhauRepository.findByNhanKhauId(id).forEach(lichSuHoKhau -> {
-            lichSuHoKhauRepository.delete(lichSuHoKhau);
-        });
-        
-        // Delete related temporary residence records
-        tamTruTamVangRepository.findByNhanKhauId(id).forEach(tamTruTamVang -> {
-            tamTruTamVangRepository.delete(tamTruTamVang);
-        });
-        
-        // Now it's safe to delete the person
-        delete(nhanKhau);
+        NhanKhau nhanKhau = nhanKhauRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy nhân khẩu với ID: " + id));
+            
+        nhanKhauRepository.delete(nhanKhau);
     }
 }
