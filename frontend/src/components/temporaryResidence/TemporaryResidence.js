@@ -96,14 +96,20 @@ const TemporaryResidence = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      if (!searchPersonId) {
-        fetchRecords();
+      if (!searchPersonId || searchPersonId === '') {
+        await fetchRecords();
       } else {
         const data = await getTemporaryResidenceByPerson(searchPersonId);
-        setRecords(data);
+        if (Array.isArray(data)) {
+          setRecords(data);
+        } else {
+          console.error('Unexpected response format:', data);
+          setRecords([]);
+        }
       }
     } catch (error) {
       console.error('Search error:', error);
+      setRecords([]);
     } finally {
       setLoading(false);
     }

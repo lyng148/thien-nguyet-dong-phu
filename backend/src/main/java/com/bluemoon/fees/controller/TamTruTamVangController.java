@@ -194,6 +194,12 @@ public class TamTruTamVangController {
         }
     }
 
+    @GetMapping("/person/{personId}")
+    public ResponseEntity<?> getTamTruTamVangByPersonId(@PathVariable Long personId) {
+        log.info("Getting tam tru tam vang for person with id: {}", personId);
+        return getTamTruTamVangByNhanKhau(personId); // Reuse existing implementation
+    }
+
     @GetMapping("/thoi-gian-range")
     public ResponseEntity<?> getTamTruTamVangByThoiGianRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,

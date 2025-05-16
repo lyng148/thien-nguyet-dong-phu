@@ -130,14 +130,24 @@ export const deleteTemporaryResidence = async (id) => {
 // Get temporary residence records by person ID
 export const getTemporaryResidenceByPerson = async (personId) => {
   try {
+    if (!personId) {
+      console.warn('Person ID is required for search');
+      return [];
+    }
+    
     const response = await api.get(`/temporary-residence/person/${personId}`);
     
+    // Handle different response formats
     if (Array.isArray(response.data)) {
       return response.data.map(record => mapToFrontendFormat(record));
+    } else if (response.data && typeof response.data === 'object') {
+      // Handle case when a single object is returned
+      return [mapToFrontendFormat(response.data)];
     }
     return [];
   } catch (error) {
     console.error(`Error fetching temporary residence records for person ${personId}:`, error);
-    throw error;
+    // Return empty array instead of throwing to prevent UI from breaking
+    return [];
   }
 };
