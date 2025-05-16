@@ -1,42 +1,48 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
-  Paper,
+  Typography,
+  Button,
+  IconButton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  IconButton,
-  Switch,
+  Paper,
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
-  Button,
+  DialogContent,
+  DialogTitle,
   TextField,
-  Alert,
+  Switch,
   CircularProgress,
-  Tooltip
+  Alert,
+  Tooltip,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Chip
 } from '@mui/material';
 import {
+  Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Add as AddIcon,
   CheckCircle as ActiveIcon,
   Cancel as InactiveIcon
 } from '@mui/icons-material';
+
 import userService from '../../services/userService';
-import { format } from 'date-fns';
 import { isAdmin } from '../../utils/auth';
-import { useNavigate } from 'react-router-dom';
+import { ROLE_ADMIN, ROLE_USER, ROLE_TO_TRUONG, ROLE_KE_TOAN } from '../../config/constants';
 
 const UserList = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -45,7 +51,7 @@ const UserList = () => {
     email: '',
     password: '',
     fullName: '',
-    role: 'USER',
+    role: ROLE_USER,
     enabled: true
   });
 
@@ -91,7 +97,7 @@ const UserList = () => {
         email: '',
         password: '',
         fullName: '',
-        role: 'USER',
+        role: ROLE_USER,
         enabled: true
       });
     }
@@ -106,7 +112,7 @@ const UserList = () => {
       email: '',
       password: '',
       fullName: '',
-      role: 'USER',
+      role: ROLE_USER,
       enabled: true
     });
   };
@@ -131,8 +137,15 @@ const UserList = () => {
           enabled: newUser.enabled
         });
       } else {
-        // Create new user
-        await userService.createUser(newUser);
+        // Create new user - map role to vaiTro for the backend
+        await userService.createUser({
+          username: newUser.username,
+          email: newUser.email,
+          password: newUser.password,
+          fullName: newUser.fullName,
+          vaiTro: newUser.role,  // Map 'role' to 'vaiTro' for the backend
+          enabled: newUser.enabled
+        });
       }
       handleCloseDialog();
       fetchUsers();
@@ -222,12 +235,18 @@ const UserList = () => {
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.fullName || '-'}</TableCell>
                 <TableCell>
-                  <Switch
-                    checked={user.role === 'ADMIN'}
-                    onChange={() => handleToggleRole(user.id, user.role)}
-                    color="primary"
-                  />
-                  {user.role === 'ADMIN' ? 'Admin' : 'User'}
+                  {user.role === ROLE_ADMIN && (
+                    <Chip label="Administrator" color="primary" />
+                  )}
+                  {user.role === ROLE_USER && (
+                    <Chip label="Regular User" color="default" />
+                  )}
+                  {user.role === ROLE_TO_TRUONG && (
+                    <Chip label="Head/Deputy" color="secondary" />
+                  )}
+                  {user.role === ROLE_KE_TOAN && (
+                    <Chip label="Accountant" color="info" />
+                  )}
                 </TableCell>
                 <TableCell>
                   <Tooltip title={user.enabled ? 'Active' : 'Inactive'}>
@@ -300,17 +319,22 @@ const UserList = () => {
                 required
               />
             )}
-            <Box display="flex" alignItems="center" gap={1}>
-              <Switch
-                checked={newUser.role === 'ADMIN'}
-                onChange={(e) => setNewUser(prev => ({
-                  ...prev,
-                  role: e.target.checked ? 'ADMIN' : 'USER'
-                }))}
-                color="primary"
-              />
-              <Typography>Admin Role</Typography>
-            </Box>
+            <FormControl fullWidth>
+              <InputLabel id="role-select-label">Role</InputLabel>
+              <Select
+                labelId="role-select-label"
+                id="role-select"
+                name="role"
+                value={newUser.role}
+                label="Role"
+                onChange={handleInputChange}
+              >
+                <MenuItem value={ROLE_USER}>Regular User</MenuItem>
+                <MenuItem value={ROLE_ADMIN}>Administrator</MenuItem>
+                <MenuItem value={ROLE_TO_TRUONG}>Head/Deputy (Tổ Trưởng/Tổ Phó)</MenuItem>
+                <MenuItem value={ROLE_KE_TOAN}>Accountant (Kế Toán)</MenuItem>
+              </Select>
+            </FormControl>
             <Box display="flex" alignItems="center" gap={1}>
               <Switch
                 checked={newUser.enabled}
@@ -333,4 +357,4 @@ const UserList = () => {
   );
 };
 
-export default UserList; 
+export default UserList;

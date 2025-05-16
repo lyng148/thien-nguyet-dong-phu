@@ -38,6 +38,7 @@ public class FeesApplication {
                     .enabled(true)
                     .build();
                 
+                
                 userRepository.save(adminUser);
                 userRepository.save(regularUser);
                 

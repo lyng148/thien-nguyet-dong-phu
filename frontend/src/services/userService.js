@@ -56,10 +56,22 @@ const userService = {
   },
 
   // Update user role
-  updateUserRole: async (userId, isAdmin) => {
+  updateUserRole: async (userId, roleOrIsAdmin) => {
     try {
+      // Check if we're passing a specific role as string
+      if (typeof roleOrIsAdmin === 'string') {
+        const response = await axios.put(`${API_BASE_URL}/users/${userId}/role`, 
+          { role: roleOrIsAdmin },
+          {
+            headers: authHeader()
+          }
+        );
+        return response.data;
+      } 
+      
+      // Legacy support for boolean isAdmin
       const response = await axios.put(`${API_BASE_URL}/users/${userId}/role`, 
-        { isAdmin },
+        { isAdmin: roleOrIsAdmin },
         {
           headers: authHeader()
         }
@@ -101,4 +113,4 @@ const userService = {
   }
 };
 
-export default userService; 
+export default userService;

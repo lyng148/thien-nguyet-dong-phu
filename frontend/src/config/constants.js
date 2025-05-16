@@ -6,6 +6,8 @@ export const TOKEN_KEY = 'bluemoon_token';
 export const USER_KEY = 'bluemoon_user';
 export const ROLE_ADMIN = 'ADMIN';
 export const ROLE_USER = 'USER';
+export const ROLE_TO_TRUONG = 'TO_TRUONG';
+export const ROLE_KE_TOAN = 'KE_TOAN';
 
 // Fee types
 export const FEE_TYPES = {
@@ -73,4 +75,4 @@ export const TIME_RANGES = {
   LAST_6_MONTHS: '6months',
   LAST_12_MONTHS: '12months',
   CUSTOM: 'custom'
-}; 
+};

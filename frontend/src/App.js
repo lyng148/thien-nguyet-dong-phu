@@ -28,7 +28,7 @@ const TemporaryResidence = React.lazy(() => import('./components/temporaryReside
 const PersonList = React.lazy(() => import('./components/person/PersonList'));
 
 // Services & Utilities
-import { getToken, clearToken, isAdmin } from './utils/auth';
+import { getToken, clearToken, isAdmin, canAccessHouseholdManagement, canAccessFeeManagement, isToTruong, isKeToan } from './utils/auth';
 
 // Create theme
 const theme = createTheme({
@@ -142,181 +142,240 @@ const App = () => {
             <Route 
               path="/dashboard" 
               element={
-                isAuthenticated ? 
-                <Dashboard /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  isToTruong() ? 
+                  <Navigate to="/households" replace /> : 
+                  isKeToan() ?
+                  <Navigate to="/fees" replace /> :
+                  <Dashboard />
+                ) : <Navigate to="/login" replace />
               } 
             />
+            {/* Household Management - ACCESS: ADMIN or TO_TRUONG */}
             <Route 
               path="/households" 
               element={
-                isAuthenticated ? 
-                <HouseholdList /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessHouseholdManagement() ? 
+                  <HouseholdList /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
             <Route 
               path="/households/add" 
               element={
-                isAuthenticated ? 
-                <HouseholdForm /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessHouseholdManagement() ? 
+                  <HouseholdForm /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
             <Route 
               path="/households/edit/:id" 
               element={
-                isAuthenticated ? 
-                <HouseholdForm /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessHouseholdManagement() ? 
+                  <HouseholdForm /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
             <Route 
               path="/households/:id" 
               element={
-                isAuthenticated ? 
-                <HouseholdDetail /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessHouseholdManagement() ? 
+                  <HouseholdDetail /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
+            
+            {/* Fee Management - ACCESS: ADMIN or KE_TOAN */}
             <Route 
               path="/fees" 
               element={
-                isAuthenticated ? 
-                <FeeList /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessFeeManagement() ? 
+                  <FeeList /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
             <Route 
               path="/fees/add" 
               element={
-                isAuthenticated ? 
-                <FeeForm /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessFeeManagement() ? 
+                  <FeeForm /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
             <Route 
               path="/fees/edit/:id" 
               element={
-                isAuthenticated ? 
-                <FeeForm /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessFeeManagement() ? 
+                  <FeeForm /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
             <Route 
               path="/fees/detail/:id" 
               element={
-                isAuthenticated ? 
-                <FeeDetail /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessFeeManagement() ? 
+                  <FeeDetail /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
+            
+            {/* Payment Management - ACCESS: ADMIN or KE_TOAN */}
             <Route 
               path="/payments" 
               element={
-                isAuthenticated ? 
-                <PaymentList /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessFeeManagement() ? 
+                  <PaymentList /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
             <Route 
               path="/payments/add" 
               element={
-                isAuthenticated ? 
-                <PaymentForm /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessFeeManagement() ? 
+                  <PaymentForm /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
             <Route 
               path="/payments/form" 
               element={
-                isAuthenticated ? 
-                <PaymentForm /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessFeeManagement() ? 
+                  <PaymentForm /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
             <Route 
               path="/payments/edit/:id" 
               element={
-                isAuthenticated ? 
-                <PaymentForm /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessFeeManagement() ? 
+                  <PaymentForm /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
+            
+            {/* Statistics - ACCESS: ADMIN or KE_TOAN */}
             <Route 
               path="/statistics" 
               element={
-                isAuthenticated ? 
-                <Statistics /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessFeeManagement() ? 
+                  <Statistics /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
+            
+            {/* User Management - ACCESS: ADMIN only */}
             <Route 
               path="/users" 
               element={
-                isAuthenticated ? 
-                <UserList /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  isAdmin() ? 
+                  <UserList /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               } 
             />
+            
+            {/* Temporary Residence Management - ACCESS: ADMIN or TO_TRUONG */}
             <Route
               path="/temporary-residence"
               element={
                 isAuthenticated ? (
-                  <React.Suspense fallback={<div>Đang tải...</div>}>
-                    <TemporaryResidence />
-                  </React.Suspense>
+                  canAccessHouseholdManagement() ? (
+                    <React.Suspense fallback={<div>Đang tải...</div>}>
+                      <TemporaryResidence />
+                    </React.Suspense>
+                  ) : <Navigate to="/dashboard" replace />
                 ) : <Navigate to="/login" replace />
               }
             />
+            
+            {/* Person Management - ACCESS: ADMIN or TO_TRUONG */}
             <Route
               path="/persons"
               element={
                 isAuthenticated ? (
-                  <React.Suspense fallback={<div>Đang tải...</div>}>
-                    <PersonList />
-                  </React.Suspense>
+                  canAccessHouseholdManagement() ? (
+                    <React.Suspense fallback={<div>Đang tải...</div>}>
+                      <PersonList />
+                    </React.Suspense>
+                  ) : <Navigate to="/dashboard" replace />
                 ) : <Navigate to="/login" replace />
               }
             />
             <Route
               path="/persons/add"
               element={
-                isAuthenticated ? 
-                <PersonForm /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessHouseholdManagement() ? 
+                  <PersonForm /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               }
             />
             <Route
               path="/persons/edit/:id"
               element={
-                isAuthenticated ? 
-                <PersonForm /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessHouseholdManagement() ? 
+                  <PersonForm /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               }
             />
             <Route
               path="/persons/:id"
               element={
-                isAuthenticated ? 
-                <PersonForm /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessHouseholdManagement() ? 
+                  <PersonForm /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               }
             />
             <Route
               path="/temporary-residence/add"
               element={
-                isAuthenticated ? 
-                <TemporaryResidenceForm /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessHouseholdManagement() ? 
+                  <TemporaryResidenceForm /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               }
             />
             <Route
               path="/temporary-residence/edit/:id"
               element={
-                isAuthenticated ? 
-                <TemporaryResidenceForm /> : 
-                <Navigate to="/login" replace />
+                isAuthenticated ? (
+                  canAccessHouseholdManagement() ? 
+                  <TemporaryResidenceForm /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
               }
             />
             <Route 

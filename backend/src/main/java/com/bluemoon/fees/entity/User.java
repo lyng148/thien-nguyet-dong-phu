@@ -31,7 +31,7 @@ public class User implements UserDetails {
     private String password;
     
     @Column(nullable = false)
-    private String vaiTro;
+    private String vaiTro;  // Can be: ADMIN, USER, TO_TRUONG, KE_TOAN
     
     private String email;
     private String fullName;

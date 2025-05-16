@@ -22,64 +22,86 @@ import {
   AssignmentInd as TemporaryResidenceIcon,
   Person as PersonIcon
 } from '@mui/icons-material';
-import { isAdmin } from '../../utils/auth';
+import { isAdmin, isToTruong, isKeToan } from '../../utils/auth';
 
 const menuItems = [
   { 
     text: 'Bảng điều khiển', 
     icon: <DashboardIcon />, 
     path: '/dashboard',
-    adminOnly: false
+    adminOnly: false,
+    hideForToTruong: true,
+    hideForKeToan: true
   },
   { 
     text: 'Hộ khẩu', 
     icon: <PeopleIcon />, 
     path: '/households',
-    adminOnly: false
+    adminOnly: false,
+    hideForToTruong: false,
+    hideForKeToan: true
   },
   { 
     text: 'Khoản thu', 
     icon: <FeeIcon />, 
     path: '/fees',
-    adminOnly: false
+    adminOnly: false,
+    hideForToTruong: true,
+    hideForKeToan: false
   },
   { 
     text: 'Nộp phí', 
     icon: <ReceiptIcon />, 
     path: '/payments',
-    adminOnly: false
+    adminOnly: false,
+    hideForToTruong: true,
+    hideForKeToan: false
   },
   {
     text: 'Tạm trú/Tạm vắng',
     icon: <TemporaryResidenceIcon />,
     path: '/temporary-residence',
-    adminOnly: false
+    adminOnly: false,
+    hideForToTruong: false,
+    hideForKeToan: true
   },
   {
     text: 'Nhân khẩu',
     icon: <PersonIcon />,
     path: '/persons',
-    adminOnly: false
+    adminOnly: false,
+    hideForToTruong: false,
+    hideForKeToan: true
   },
   { 
     text: 'Thống kê', 
     icon: <StatisticsIcon />, 
     path: '/statistics',
-    adminOnly: false
+    adminOnly: false,
+    hideForToTruong: true,
+    hideForKeToan: false
   },
   { 
     text: 'Quản lý User', 
     icon: <UserManagementIcon />, 
     path: '/users',
-    adminOnly: true
+    adminOnly: true,
+    hideForToTruong: false,
+    hideForKeToan: true
   }
 ];
 
 const Sidebar = ({ open }) => {
   const location = useLocation();
   const admin = isAdmin();
+  const toTruong = isToTruong();
+  const keToan = isKeToan();
   
-  const visibleMenuItems = menuItems.filter(item => !item.adminOnly || admin);
+  const visibleMenuItems = menuItems.filter(item => 
+    (!item.adminOnly || admin) && 
+    !(toTruong && item.hideForToTruong) &&
+    !(keToan && item.hideForKeToan)
+  );
 
   return (
     <Drawer

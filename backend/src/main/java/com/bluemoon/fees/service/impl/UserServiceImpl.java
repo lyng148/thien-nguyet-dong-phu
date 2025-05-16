@@ -71,6 +71,12 @@ public class UserServiceImpl implements UserService {
         if (existsByEmail(user.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
+        
+        // Set default role if none provided
+        if (user.getVaiTro() == null || user.getVaiTro().isEmpty()) {
+            user.setVaiTro("USER");
+        }
+        
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return save(user);
     }

@@ -51,8 +51,26 @@ public class UserController {
 
     @PutMapping("/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> updateUserRole(@PathVariable Long id, @RequestBody Map<String, Boolean> roleMap) {
-        boolean isAdmin = roleMap.getOrDefault("isAdmin", false);
+    public ResponseEntity<?> updateUserRole(@PathVariable Long id, @RequestBody Map<String, Object> roleMap) {
+        // Check if we receive a string role directly
+        if (roleMap.containsKey("role")) {
+            String role = (String) roleMap.get("role");
+            User user = userService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+            
+            // Validate role
+            if (role.equals("ADMIN") || role.equals("USER") || 
+                role.equals("TO_TRUONG") || role.equals("KE_TOAN")) {
+                user.setVaiTro(role);
+                userService.save(user);
+                return ResponseEntity.ok().build();
+            } else {
+                throw new IllegalArgumentException("Invalid role: " + role);
+            }
+        }
+        
+        // Legacy support for isAdmin boolean
+        boolean isAdmin = Boolean.TRUE.equals(roleMap.get("isAdmin"));
         User user = userService.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
         
@@ -74,4 +92,4 @@ public class UserController {
         
         return ResponseEntity.ok().build();
     }
-} 
+}
