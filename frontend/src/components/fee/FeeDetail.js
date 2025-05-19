@@ -20,18 +20,43 @@ import {
   Divider,
   Stack,
   IconButton,
-  Tooltip
+  Tooltip,
+  Tabs,
+  Tab
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
   PeopleAlt as PeopleIcon,
   Paid as PaidIcon,
   DateRange as DateRangeIcon,
-  Home as HomeIcon
+  Home as HomeIcon,
+  Cancel as CancelIcon
 } from '@mui/icons-material';
 
 import PageHeader from '../common/PageHeader';
 import { getFeeById, getHouseholdsPaidForFee } from '../../services/feeService';
+import { getAllHouseholds } from '../../services/householdService';
+
+// TabPanel component for displaying tab content
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`fee-tabpanel-${index}`}
+      aria-labelledby={`fee-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ pt: 2 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
 
 const FeeDetail = () => {
   const { id } = useParams();
@@ -40,12 +65,20 @@ const FeeDetail = () => {
   // State
   const [fee, setFee] = useState(null);
   const [paidHouseholds, setPaidHouseholds] = useState([]);
+  const [unpaidHouseholds, setUnpaidHouseholds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState({
     totalCollected: 0,
-    totalPaidHouseholds: 0
+    totalPaidHouseholds: 0,
+    totalUnpaidHouseholds: 0
   });
+  const [tabValue, setTabValue] = useState(0);
+
+  // Handle tab change
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
 
   // Load fee details and households that have paid
   useEffect(() => {
@@ -60,12 +93,27 @@ const FeeDetail = () => {
         
         // Load households that have paid for this fee
         const paidHouseholdsData = await getHouseholdsPaidForFee(id);
-        setPaidHouseholds(paidHouseholdsData.paidHouseholds || []);
+        const paidHouseholdsList = paidHouseholdsData.paidHouseholds || [];
+        setPaidHouseholds(paidHouseholdsList);
+        
+        // Load all households to identify unpaid ones
+        const allHouseholds = await getAllHouseholds({ showAll: false }); // Only active households
+        
+        // Create a set of household IDs that have paid
+        const paidHouseholdIds = new Set(paidHouseholdsList.map(h => h.householdId));
+        
+        // Filter out households that haven't paid
+        const unpaidList = allHouseholds.filter(household => 
+          !paidHouseholdIds.has(household.id)
+        );
+        
+        setUnpaidHouseholds(unpaidList);
         
         // Set statistics
         setStats({
           totalCollected: paidHouseholdsData.totalCollected || 0,
-          totalPaidHouseholds: paidHouseholdsData.totalPaidHouseholds || 0
+          totalPaidHouseholds: paidHouseholdsList.length,
+          totalUnpaidHouseholds: unpaidList.length
         });
         
       } catch (error) {
@@ -212,6 +260,19 @@ const FeeDetail = () => {
                           </Box>
                         </Box>
                       </Grid>
+                      <Grid item xs={12}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <CancelIcon color="error" sx={{ mr: 2 }} />
+                          <Box>
+                            <Typography variant="body2" color="textSecondary">
+                              Hộ khẩu chưa thanh toán
+                            </Typography>
+                            <Typography variant="h5" fontWeight="medium">
+                              {stats.totalUnpaidHouseholds}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Grid>
                     </Grid>
                   </Paper>
                 </Grid>
@@ -219,46 +280,113 @@ const FeeDetail = () => {
             </CardContent>
           </Card>
 
-          {/* Paid Households Card */}
+          {/* Households Card with Tabs */}
           <Card>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
+              <Tabs 
+                value={tabValue} 
+                onChange={handleTabChange} 
+                aria-label="households tabs"
+                variant="fullWidth"
+              >
+                <Tab 
+                  label={`Hộ khẩu đã thanh toán (${stats.totalPaidHouseholds})`} 
+                  icon={<PaidIcon />} 
+                  iconPosition="start"
+                />
+                <Tab 
+                  label={`Hộ khẩu chưa thanh toán (${stats.totalUnpaidHouseholds})`} 
+                  icon={<CancelIcon />} 
+                  iconPosition="start"
+                />
+              </Tabs>
+            </Box>
+            
             <CardContent>
-              <Typography variant="h5" component="h2" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                <HomeIcon sx={{ mr: 1 }} />
-                Danh sách hộ khẩu đã thanh toán
-              </Typography>
-              
-              {paidHouseholds.length === 0 ? (
-                <Alert severity="info" sx={{ mt: 2 }}>
-                  Chưa có hộ khẩu nào thanh toán cho khoản thu này.
-                </Alert>
-              ) : (
-                <TableContainer component={Paper} elevation={0}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Số hộ khẩu</TableCell>
-                        <TableCell>Chủ hộ</TableCell>
-                        <TableCell>Địa chỉ</TableCell>
-                        <TableCell align="right">Số tiền đã nộp</TableCell>
-                        <TableCell>Ngày nộp</TableCell>
-                        <TableCell>Ghi chú</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {paidHouseholds.map((household) => (
-                        <TableRow key={household.paymentId}>
-                          <TableCell>{household.soHoKhau || 'N/A'}</TableCell>
-                          <TableCell>{household.ownerName}</TableCell>
-                          <TableCell>{household.address}</TableCell>
-                          <TableCell align="right">{formatCurrency(household.amount)}</TableCell>
-                          <TableCell>{formatDate(household.paymentDate)}</TableCell>
-                          <TableCell>{household.notes || '-'}</TableCell>
+              {/* Paid Households Tab */}
+              <TabPanel value={tabValue} index={0}>
+                <Typography variant="h5" component="h2" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                  <HomeIcon sx={{ mr: 1 }} />
+                  Danh sách hộ khẩu đã thanh toán
+                </Typography>
+                
+                {paidHouseholds.length === 0 ? (
+                  <Alert severity="info" sx={{ mt: 2 }}>
+                    Chưa có hộ khẩu nào thanh toán cho khoản thu này.
+                  </Alert>
+                ) : (
+                  <TableContainer component={Paper} elevation={0}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Số hộ khẩu</TableCell>
+                          <TableCell>Chủ hộ</TableCell>
+                          <TableCell>Địa chỉ</TableCell>
+                          <TableCell align="right">Số tiền đã nộp</TableCell>
+                          <TableCell>Ngày nộp</TableCell>
+                          <TableCell>Ghi chú</TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
+                      </TableHead>
+                      <TableBody>
+                        {paidHouseholds.map((household) => (
+                          <TableRow key={household.paymentId}>
+                            <TableCell>{household.soHoKhau || 'N/A'}</TableCell>
+                            <TableCell>{household.ownerName}</TableCell>
+                            <TableCell>{household.address}</TableCell>
+                            <TableCell align="right">{formatCurrency(household.amount)}</TableCell>
+                            <TableCell>{formatDate(household.paymentDate)}</TableCell>
+                            <TableCell>{household.notes || '-'}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+              </TabPanel>
+              
+              {/* Unpaid Households Tab */}
+              <TabPanel value={tabValue} index={1}>
+                <Typography variant="h5" component="h2" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                  <HomeIcon sx={{ mr: 1 }} />
+                  Danh sách hộ khẩu chưa thanh toán
+                </Typography>
+                
+                {unpaidHouseholds.length === 0 ? (
+                  <Alert severity="success" sx={{ mt: 2 }}>
+                    Tất cả hộ khẩu đã thanh toán cho khoản thu này.
+                  </Alert>
+                ) : (
+                  <TableContainer component={Paper} elevation={0}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Số hộ khẩu</TableCell>
+                          <TableCell>Chủ hộ</TableCell>
+                          <TableCell>Địa chỉ</TableCell>
+                          <TableCell>Liên hệ</TableCell>
+                          <TableCell>Số thành viên</TableCell>
+                          <TableCell align="right">Số tiền cần nộp</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {unpaidHouseholds.map((household) => (
+                          <TableRow key={household.id}>
+                            <TableCell>{household.soHoKhau || 'N/A'}</TableCell>
+                            <TableCell>{household.ownerName}</TableCell>
+                            <TableCell>{household.address}</TableCell>
+                            <TableCell>
+                              {household.phoneNumber || '-'}
+                              {household.email && <div><small>{household.email}</small></div>}
+                            </TableCell>
+                            <TableCell align="center">{household.numMembers}</TableCell>
+                            <TableCell align="right">{formatCurrency(fee?.amount || 0)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+              </TabPanel>
             </CardContent>
           </Card>
         </>
