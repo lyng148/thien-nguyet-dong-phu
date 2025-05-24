@@ -67,7 +67,7 @@ const FeeForm = () => {
           });
         } catch (err) {
           console.error('Error fetching fee:', err);
-          setError('Error loading fee data. Please try again.');
+          setError('Lỗi khi tải dữ liệu khoản thu. Vui lòng thử lại.');
         } finally {
           setLoading(false);
         }
@@ -107,7 +107,7 @@ const FeeForm = () => {
     try {
       // Validate form data
       if (!formData.name || formData.amount === '' || !formData.dueDate) {
-        throw new Error('Please fill all required fields');
+        throw new Error('Vui lòng điền đầy đủ các trường bắt buộc');
       }
 
       // Create fee data object
@@ -125,11 +125,11 @@ const FeeForm = () => {
       if (isEdit) {
         result = await updateFee(id, feeData);
         console.log('Fee updated successfully:', result);
-        setSuccess('Fee updated successfully');
+        setSuccess('Cập nhật khoản thu thành công');
       } else {
         result = await createFee(feeData);
         console.log('Fee created successfully:', result);
-        setSuccess('Fee created successfully' + (!admin ? ' (Pending approval)' : ''));
+        setSuccess('Tạo khoản thu thành công' + (!admin ? ' (Đang chờ phê duyệt)' : ''));
       }
       
       // Redirect after successful save
@@ -139,7 +139,7 @@ const FeeForm = () => {
       
     } catch (err) {
       console.error('Save fee error:', err);
-      setError(err.message || err.response?.data?.message || 'An error occurred while saving the fee');
+      setError(err.message || err.response?.data?.message || 'Có lỗi xảy ra khi lưu thông tin khoản thu');
     } finally {
       setSaving(false);
     }
@@ -175,12 +175,12 @@ const FeeForm = () => {
   return (
     <Box>
       <PageHeader 
-        title={isEdit ? 'Edit Fee' : 'Add Fee'} 
-        subtitle={isEdit ? 'Update fee information' : 'Create a new fee record'}
+        title={isEdit ? 'Chỉnh sửa khoản thu' : 'Thêm khoản thu'} 
+        subtitle={isEdit ? 'Cập nhật thông tin khoản thu' : 'Tạo khoản thu mới'}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Fees', path: '/fees' },
-          { label: isEdit ? 'Edit' : 'Add' }
+          { label: 'Trang chủ', path: '/dashboard' },
+          { label: 'Khoản thu', path: '/fees' },
+          { label: isEdit ? 'Chỉnh sửa' : 'Thêm khoản thu' }
         ]}
       />
 
@@ -205,41 +205,41 @@ const FeeForm = () => {
               )}
 
               <Typography variant="h6" gutterBottom>
-                Fee Information
+                Thông tin khoản thu
               </Typography>
 
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Fee Name"
+                    label="Tên khoản thu"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
                     fullWidth
                     required
                     disabled={saving}
-                    placeholder="e.g. Service Fee, Maintenance Fee"
+                    placeholder="VD: Phí dịch vụ, Phí bảo trì"
                   />
                 </Grid>
                 
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth required disabled={saving}>
-                    <InputLabel>Fee Type</InputLabel>
+                    <InputLabel>Loại khoản thu</InputLabel>
                     <Select
                       name="type"
                       value={formData.type}
-                      label="Fee Type"
+                      label="Loại khoản thu"
                       onChange={handleChange}
                     >
-                      <MenuItem value="MANDATORY">Mandatory</MenuItem>
-                      <MenuItem value="VOLUNTARY">Voluntary</MenuItem>
+                      <MenuItem value="MANDATORY">Bắt buộc</MenuItem>
+                      <MenuItem value="VOLUNTARY">Tự nguyện</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
                 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Amount"
+                    label="Số tiền"
                     name="amount"
                     type="number"
                     value={formData.amount}
@@ -255,7 +255,7 @@ const FeeForm = () => {
                 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Due Date"
+                    label="Hạn thanh toán"
                     name="dueDate"
                     type="date"
                     value={formData.dueDate}
@@ -271,7 +271,7 @@ const FeeForm = () => {
                 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Creation Date"
+                    label="Ngày tạo"
                     name="ngayTao"
                     type="date"
                     value={formData.ngayTao}
@@ -286,7 +286,7 @@ const FeeForm = () => {
                 
                 <Grid item xs={12}>
                   <TextField
-                    label="Description (Optional)"
+                    label="Mô tả (Tùy chọn)"
                     name="description"
                     value={formData.description || ''}
                     onChange={handleChange}
@@ -309,14 +309,14 @@ const FeeForm = () => {
                           color="success"
                         />
                       }
-                      label="Active"
+                      label="Đang hoạt động"
                     />
                   </Grid>
                 )}
                 {!admin && (
                   <Grid item xs={12}>
                     <Alert severity="info" sx={{ mt: 1 }}>
-                      Your fee submission will require approval by an administrator.
+                      Việc tạo khoản thu của bạn sẽ cần được quản trị viên phê duyệt.
                     </Alert>
                   </Grid>
                 )}
@@ -331,7 +331,7 @@ const FeeForm = () => {
                   startIcon={<ArrowBackIcon />}
                   disabled={saving}
                 >
-                  Cancel
+                  Hủy
                 </Button>
                 
                 <Button
@@ -343,10 +343,10 @@ const FeeForm = () => {
                   {saving ? (
                     <>
                       <CircularProgress size={24} sx={{ mr: 1 }} color="inherit" />
-                      Saving...
+                      Đang lưu...
                     </>
                   ) : (
-                    isEdit ? 'Update Fee' : 'Create Fee'
+                    isEdit ? 'Cập nhật khoản thu' : 'Tạo khoản thu'
                   )}
                 </Button>
               </Box>

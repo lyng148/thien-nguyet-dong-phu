@@ -174,7 +174,7 @@ const TemporaryResidenceForm = () => {
         title={isEdit ? 'Sửa thông tin tạm trú/tạm vắng' : 'Thêm thông tin tạm trú/tạm vắng'} 
         subtitle={isEdit ? 'Cập nhật thông tin tạm trú/tạm vắng' : 'Đăng ký mới thông tin tạm trú/tạm vắng'}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/dashboard' },
+          { label: 'Bảng điều khiển', path: '/dashboard' },
           { label: 'Tạm trú/Tạm vắng', path: '/temporary-residence' },
           { label: isEdit ? 'Sửa' : 'Thêm' }
         ]}

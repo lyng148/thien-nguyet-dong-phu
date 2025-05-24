@@ -118,7 +118,7 @@ const FeeDetail = () => {
         
       } catch (error) {
         console.error('Error loading fee details:', error);
-        setError('Failed to load fee details. Please try again.');
+        setError('Không thể tải chi tiết khoản thu. Vui lòng thử lại.');
       } finally {
         setLoading(false);
       }
@@ -330,12 +330,12 @@ const FeeDetail = () => {
                       <TableBody>
                         {paidHouseholds.map((household) => (
                           <TableRow key={household.paymentId}>
-                            <TableCell>{household.soHoKhau || 'N/A'}</TableCell>
+                            <TableCell>{household.soHoKhau || 'Không có'}</TableCell>
                             <TableCell>{household.ownerName}</TableCell>
                             <TableCell>{household.address}</TableCell>
                             <TableCell align="right">{formatCurrency(household.amount)}</TableCell>
                             <TableCell>{formatDate(household.paymentDate)}</TableCell>
-                            <TableCell>{household.notes || '-'}</TableCell>
+                            <TableCell>{household.notes || 'Không có'}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -371,11 +371,11 @@ const FeeDetail = () => {
                       <TableBody>
                         {unpaidHouseholds.map((household) => (
                           <TableRow key={household.id}>
-                            <TableCell>{household.soHoKhau || 'N/A'}</TableCell>
+                            <TableCell>{household.soHoKhau || 'Không có'}</TableCell>
                             <TableCell>{household.ownerName}</TableCell>
                             <TableCell>{household.address}</TableCell>
                             <TableCell>
-                              {household.phoneNumber || '-'}
+                              {household.phoneNumber || 'Không có'}
                               {household.email && <div><small>{household.email}</small></div>}
                             </TableCell>
                             <TableCell align="center">{household.numMembers}</TableCell>

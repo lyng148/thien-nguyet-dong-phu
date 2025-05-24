@@ -196,14 +196,14 @@ const FeeList = () => {
   return (
     <Box>
       <PageHeader 
-        title="Fees" 
-        subtitle="Manage apartment fees and payment schedules"
-        actionText="Add Fee"
+        title="Quản lý khoản thu" 
+        subtitle="Quản lý các khoản thu chung cư và lịch thanh toán"
+        actionText="Thêm khoản thu"
         actionIcon={<AddIcon />}
         onActionClick={() => navigate('/fees/add')}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Fees' }
+          { label: 'Trang chủ', path: '/dashboard' },
+          { label: 'Quản lý khoản thu' }
         ]}
       />
 
@@ -211,7 +211,7 @@ const FeeList = () => {
         <CardContent>
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, mb: 3 }}>
             <TextField
-              placeholder="Search fees..."
+              placeholder="Tìm kiếm khoản thu..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               sx={{ flexGrow: 1 }}
@@ -226,32 +226,32 @@ const FeeList = () => {
             
             <Box sx={{ display: 'flex', gap: 2 }}>
               <FormControl sx={{ minWidth: 150 }}>
-                <InputLabel>Type</InputLabel>
+                <InputLabel>Loại phí</InputLabel>
                 <Select
                   value={filterType}
-                  label="Type"
+                  label="Loại phí"
                   onChange={(e) => setFilterType(e.target.value)}
                 >
-                  <MenuItem value="ALL">All Types</MenuItem>
-                  <MenuItem value="MANDATORY">Mandatory</MenuItem>
-                  <MenuItem value="VOLUNTARY">Voluntary</MenuItem>
+                  <MenuItem value="ALL">Tất cả loại</MenuItem>
+                  <MenuItem value="MANDATORY">Bắt buộc</MenuItem>
+                  <MenuItem value="VOLUNTARY">Tự nguyện</MenuItem>
                 </Select>
               </FormControl>
               
               <FormControl sx={{ minWidth: 150 }}>
-                <InputLabel>Status</InputLabel>
+                <InputLabel>Trạng thái</InputLabel>
                 <Select
                   value={filterStatus}
-                  label="Status"
+                  label="Trạng thái"
                   onChange={(e) => setFilterStatus(e.target.value)}
                 >
-                  <MenuItem value="ALL">All Status</MenuItem>
-                  <MenuItem value="ACTIVE">Active</MenuItem>
-                  <MenuItem value="INACTIVE">Inactive</MenuItem>
+                  <MenuItem value="ALL">Tất cả trạng thái</MenuItem>
+                  <MenuItem value="ACTIVE">Đang hoạt động</MenuItem>
+                  <MenuItem value="INACTIVE">Ngừng hoạt động</MenuItem>
                 </Select>
               </FormControl>
               
-              <Tooltip title="Refresh">
+              <Tooltip title="Làm mới">
                 <IconButton 
                   onClick={handleRefresh} 
                   color="primary"
@@ -270,7 +270,7 @@ const FeeList = () => {
               {filteredFees.length === 0 ? (
                 <Box sx={{ py: 4, textAlign: 'center' }}>
                   <Typography variant="body1" color="text.secondary" gutterBottom>
-                    No fees found.
+                    Không tìm thấy khoản thu nào.
                   </Typography>
                   {admin && (
                     <Button 
@@ -279,7 +279,7 @@ const FeeList = () => {
                       onClick={() => navigate('/fees/add')}
                       sx={{ mt: 2 }}
                     >
-                      Add Fee
+                      Thêm khoản thu
                     </Button>
                   )}
                 </Box>
@@ -288,12 +288,12 @@ const FeeList = () => {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Type</TableCell>
-                        <TableCell align="right">Amount</TableCell>
-                        <TableCell>Due Date</TableCell>
-                        <TableCell align="center">Status</TableCell>
-                        <TableCell align="right">Actions</TableCell>
+                        <TableCell>Tên khoản thu</TableCell>
+                        <TableCell>Loại</TableCell>
+                        <TableCell align="right">Số tiền</TableCell>
+                        <TableCell>Hạn thanh toán</TableCell>
+                        <TableCell align="center">Trạng thái</TableCell>
+                        <TableCell align="right">Thao tác</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -302,23 +302,23 @@ const FeeList = () => {
                           <TableCell>{fee.name}</TableCell>
                           <TableCell>
                             <Chip 
-                              label={fee.type === 'MANDATORY' ? 'Mandatory' : 'Voluntary'} 
+                              label={fee.type === 'MANDATORY' ? 'Bắt buộc' : 'Tự nguyện'} 
                               color={fee.type === 'MANDATORY' ? 'primary' : 'secondary'}
                               variant="outlined"
                               size="small"
                             />
                           </TableCell>
-                          <TableCell align="right">${fee.amount}</TableCell>
+                          <TableCell align="right">{fee.amount.toLocaleString('vi-VN')} VNĐ</TableCell>
                           <TableCell>{formatDate(fee.dueDate)}</TableCell>
                           <TableCell align="center">
                             <Chip 
-                              label={fee.active ? 'Active' : 'Inactive'} 
+                              label={fee.active ? 'Đang hoạt động' : 'Ngừng hoạt động'} 
                               color={fee.active ? 'success' : 'default'}
                               size="small"
                             />
                           </TableCell>
                           <TableCell align="right">
-                            <Tooltip title="View Details">
+                            <Tooltip title="Xem chi tiết">
                               <IconButton
                                 size="small"
                                 onClick={() => navigate(`/fees/detail/${fee.id}`)}
@@ -327,7 +327,7 @@ const FeeList = () => {
                                 <VisibilityIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip title="Edit">
+                            <Tooltip title="Sửa">
                               <IconButton
                                 size="small"
                                 onClick={() => handleEdit(fee.id)}
@@ -339,7 +339,7 @@ const FeeList = () => {
                             
                             {admin && (
                               <>
-                                <Tooltip title={fee.active ? 'Deactivate' : 'Activate'}>
+                                <Tooltip title={fee.active ? 'Ngừng hoạt động' : 'Kích hoạt'}>
                                   <IconButton
                                     size="small"
                                     onClick={() => handleToggleStatus(fee.id, fee.active)}
@@ -352,7 +352,7 @@ const FeeList = () => {
                                   </IconButton>
                                 </Tooltip>
                                 
-                                <Tooltip title="Delete">
+                                <Tooltip title="Xóa">
                                   <IconButton
                                     size="small"
                                     onClick={() => handleDeleteDialogOpen(fee)}
@@ -383,16 +383,16 @@ const FeeList = () => {
         aria-describedby="delete-fee-dialog-description"
       >
         <DialogTitle id="delete-fee-dialog-title">
-          Delete Fee
+          Xóa khoản thu
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-fee-dialog-description">
-            Are you sure you want to permanently delete the fee "{feeToDelete?.name}"? This action cannot be undone.
+            Bạn có chắc chắn muốn xóa vĩnh viễn khoản thu "{feeToDelete?.name}" không? Hành động này không thể hoàn tác.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeleteDialogClose}>
-            Cancel
+            Hủy
           </Button>
           <Button 
             onClick={handleDeleteFee} 
@@ -400,7 +400,7 @@ const FeeList = () => {
             variant="contained"
             autoFocus
           >
-            Delete
+            Xóa
           </Button>
         </DialogActions>
       </Dialog>

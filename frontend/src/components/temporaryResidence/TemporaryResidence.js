@@ -187,7 +187,7 @@ const TemporaryResidence = () => {
         actionIcon={<AddIcon />}
         onActionClick={() => handleOpenForm()}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/dashboard' },
+          { label: 'Bảng điều khiển', path: '/dashboard' },
           { label: 'Tạm trú/Tạm vắng' }
         ]}
       />

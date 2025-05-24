@@ -75,7 +75,7 @@ const HouseholdForm = () => {
           });
         } catch (err) {
           console.error('Error fetching household:', err);
-          setError('Error loading household data. Please try again.');
+          setError('Lỗi khi tải dữ liệu hộ khẩu. Vui lòng thử lại.');
         } finally {
           setLoading(false);
         }
@@ -134,12 +134,12 @@ const HouseholdForm = () => {
         console.log(`Updating household with ID ${id}`);
         result = await updateHousehold(id, householdData);
         console.log('Household updated successfully:', result);
-        setSuccess('Household updated successfully');
+        setSuccess('Cập nhật hộ khẩu thành công');
       } else {
         console.log('Creating new household');
         result = await createHousehold(householdData);
         console.log('Household created successfully:', result);
-        setSuccess('Household created successfully' + (!admin ? ' (Pending approval)' : ''));
+        setSuccess('Tạo hộ khẩu thành công' + (!admin ? ' (Đang chờ phê duyệt)' : ''));
       }
       
       // Redirect after successful save
@@ -155,7 +155,7 @@ const HouseholdForm = () => {
         response: err.response?.data,
         status: err.response?.status
       });
-      setError(err.response?.data?.message || err.message || 'An error occurred while saving the household');
+      setError(err.response?.data?.message || err.message || 'Có lỗi xảy ra khi lưu thông tin hộ khẩu');
     } finally {
       setSaving(false);
     }
@@ -191,12 +191,12 @@ const HouseholdForm = () => {
   return (
     <Box>
       <PageHeader 
-        title={isEdit ? 'Edit Household' : 'Add Household'} 
-        subtitle={isEdit ? 'Update household information' : 'Create a new household record'}
+        title={isEdit ? 'Chỉnh sửa hộ khẩu' : 'Thêm hộ khẩu'} 
+        subtitle={isEdit ? 'Cập nhật thông tin hộ khẩu' : 'Tạo hộ khẩu mới'}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Households', path: '/households' },
-          { label: isEdit ? 'Edit' : 'Add' }
+          { label: 'Trang chủ', path: '/dashboard' },
+          { label: 'Hộ khẩu', path: '/households' },
+          { label: isEdit ? 'Chỉnh sửa' : 'Thêm hộ khẩu' }
         ]}
       />
 
@@ -221,13 +221,13 @@ const HouseholdForm = () => {
               )}
 
               <Typography variant="h6" gutterBottom>
-                Basic Information
+                Thông tin cơ bản
               </Typography>
 
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Owner Name"
+                    label="Tên chủ hộ"
                     name="ownerName"
                     value={formData.ownerName}
                     onChange={handleChange}
@@ -239,7 +239,7 @@ const HouseholdForm = () => {
                 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Household Book Number"
+                    label="Số hộ khẩu"
                     name="soHoKhau"
                     value={formData.soHoKhau}
                     onChange={handleChange}
@@ -250,7 +250,7 @@ const HouseholdForm = () => {
 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Household Registration Date"
+                    label="Ngày làm hộ khẩu"
                     name="ngayLamHoKhau"
                     type="date"
                     value={formData.ngayLamHoKhau}
@@ -265,13 +265,13 @@ const HouseholdForm = () => {
               </Grid>
 
               <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-                Contact Information
+                Thông tin liên hệ
               </Typography>
 
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Phone Number"
+                    label="Số điện thoại"
                     name="phoneNumber"
                     value={formData.phoneNumber}
                     onChange={handleChange}
@@ -294,13 +294,13 @@ const HouseholdForm = () => {
               </Grid>
 
               <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-                Address Details
+                Thông tin địa chỉ
               </Typography>
 
               <Grid container spacing={3}>
                 <Grid item xs={12} md={3}>
                   <TextField
-                    label="House Number"
+                    label="Số nhà"
                     name="soNha"
                     value={formData.soNha}
                     onChange={handleChange}
@@ -312,7 +312,7 @@ const HouseholdForm = () => {
                 
                 <Grid item xs={12} md={3}>
                   <TextField
-                    label="Street"
+                    label="Đường"
                     name="duong"
                     value={formData.duong}
                     onChange={handleChange}
@@ -324,7 +324,7 @@ const HouseholdForm = () => {
                 
                 <Grid item xs={12} md={3}>
                   <TextField
-                    label="Ward"
+                    label="Phường"
                     name="phuong"
                     value={formData.phuong}
                     onChange={handleChange}
@@ -336,7 +336,7 @@ const HouseholdForm = () => {
                 
                 <Grid item xs={12} md={3}>
                   <TextField
-                    label="District"
+                    label="Quận"
                     name="quan"
                     value={formData.quan}
                     onChange={handleChange}
@@ -358,14 +358,14 @@ const HouseholdForm = () => {
                           color="success"
                         />
                       }
-                      label="Active"
+                      label="Đang hoạt động"
                     />
                   </Grid>
                 )}
                 {!admin && (
                   <Grid item xs={12}>
                     <Alert severity="info" sx={{ mt: 1 }}>
-                      Your household registration will require approval by an administrator.
+                      Việc đăng ký hộ gia đình của bạn sẽ cần được quản trị viên phê duyệt.
                     </Alert>
                   </Grid>
                 )}
@@ -380,7 +380,7 @@ const HouseholdForm = () => {
                   startIcon={<ArrowBackIcon />}
                   disabled={saving}
                 >
-                  Cancel
+                  Hủy
                 </Button>
                 
                 <Button
@@ -392,10 +392,10 @@ const HouseholdForm = () => {
                   {saving ? (
                     <>
                       <CircularProgress size={20} sx={{ mr: 1 }} />
-                      Saving...
+                      Đang lưu...
                     </>
                   ) : (
-                    'Save Household'
+                    'Lưu hộ khẩu'
                   )}
                 </Button>
               </Box>

@@ -191,7 +191,7 @@ const PersonForm = () => {
         title={isEdit ? 'Sửa Nhân khẩu' : 'Thêm Nhân khẩu'} 
         subtitle={isEdit ? 'Cập nhật thông tin nhân khẩu' : 'Thêm mới thông tin nhân khẩu'}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/dashboard' },
+          { label: 'Bảng điều khiển', path: '/dashboard' },
           { label: 'Nhân khẩu', path: '/persons' },
           { label: isEdit ? 'Sửa' : 'Thêm' }
         ]}

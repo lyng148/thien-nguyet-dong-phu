@@ -222,7 +222,7 @@ const PersonList = () => {
         actionIcon={<AddIcon />}
         onActionClick={() => navigate('/persons/add')}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/dashboard' },
+          { label: 'Bảng điều khiển', path: '/dashboard' },
           { label: 'Nhân khẩu' }
         ]}
       />

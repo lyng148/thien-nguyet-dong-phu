@@ -197,17 +197,17 @@ const PaymentForm = () => {
     
     // Validate form data
     if (!formData.householdId) {
-      setError('Please select a household');
+      setError('Vui lòng chọn hộ khẩu');
       return;
     }
     
     if (!formData.feeId) {
-      setError('Please select a fee');
+      setError('Vui lòng chọn khoản thu');
       return;
     }
     
     if (formData.amount === '' || formData.amount < 0) {
-      setError('Please enter a valid payment amount');
+      setError('Vui lòng nhập số tiền thanh toán hợp lệ');
       return;
     }
     
@@ -230,10 +230,10 @@ const PaymentForm = () => {
       
       if (isEdit) {
         await updatePayment(id, paymentData);
-        setSuccess('Payment updated successfully');
+        setSuccess('Cập nhật thanh toán thành công');
       } else {
         await createPayment(paymentData);
-        setSuccess('Payment created successfully' + (!admin ? ' (Pending verification)' : ''));
+        setSuccess('Tạo thanh toán thành công' + (!admin ? ' (Đang chờ xác nhận)' : ''));
       }
       
       // Redirect after successful save
@@ -243,7 +243,7 @@ const PaymentForm = () => {
       
     } catch (err) {
       console.error('Save payment error:', err);
-      setError(err.response?.data?.message || 'An error occurred while saving the payment');
+      setError(err.response?.data?.message || 'Có lỗi xảy ra khi lưu thanh toán');
     } finally {
       setSaving(false);
     }
@@ -259,12 +259,12 @@ const PaymentForm = () => {
   return (
     <Box>
       <PageHeader 
-        title={isEdit ? 'Edit Payment' : 'Add Payment'} 
-        subtitle={isEdit ? 'Update payment information' : 'Create a new payment record'}
+        title={isEdit ? 'Chỉnh sửa thanh toán' : 'Thêm thanh toán'} 
+        subtitle={isEdit ? 'Cập nhật thông tin thanh toán' : 'Tạo bản ghi thanh toán mới'}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Payments', path: '/payments' },
-          { label: isEdit ? 'Edit' : 'Add' }
+          { label: 'Bảng điều khiển', path: '/dashboard' },
+          { label: 'Thanh toán', path: '/payments' },
+          { label: isEdit ? 'Chỉnh sửa' : 'Thêm thanh toán' }
         ]}
       />
 
@@ -297,7 +297,7 @@ const PaymentForm = () => {
               )}
 
               <Typography variant="h6" gutterBottom>
-                Payment Details
+                Chi tiết thanh toán
               </Typography>
 
               <Grid container spacing={3}>
@@ -311,10 +311,10 @@ const PaymentForm = () => {
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        label="Household"
+                        label="Hộ khẩu"
                         required
                         error={!formData.householdId && formData.householdId !== ''}
-                        helperText={!formData.householdId && 'Household is required'}
+                        helperText={!formData.householdId && 'Hộ khẩu là bắt buộc'}
                         disabled={saving}
                       />
                     )}
@@ -331,10 +331,10 @@ const PaymentForm = () => {
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        label="Fee"
+                        label="Khoản thu"
                         required
                         error={!formData.feeId && formData.feeId !== ''}
-                        helperText={!formData.feeId && 'Fee is required'}
+                        helperText={!formData.feeId && 'Khoản thu là bắt buộc'}
                         disabled={saving}
                       />
                     )}
@@ -343,7 +343,7 @@ const PaymentForm = () => {
                 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Total Amount"
+                    label="Tổng số tiền"
                     name="amount"
                     type="number"
                     value={formData.amount}
@@ -359,7 +359,7 @@ const PaymentForm = () => {
                 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Amount Paid"
+                    label="Số tiền đã nộp"
                     name="amountPaid"
                     type="number"
                     value={formData.amountPaid}
@@ -375,7 +375,7 @@ const PaymentForm = () => {
                 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Payment Date"
+                    label="Ngày thanh toán"
                     name="paymentDate"
                     type="date"
                     value={formatDateForInput(formData.paymentDate)}
@@ -391,19 +391,19 @@ const PaymentForm = () => {
                 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Payer Name"
+                    label="Tên người nộp"
                     name="payerName"
                     value={formData.payerName}
                     onChange={handleChange}
                     fullWidth
                     disabled={saving}
-                    placeholder="Name of the person making the payment"
+                    placeholder="Tên người thực hiện thanh toán"
                   />
                 </Grid>
                 
                 <Grid item xs={12}>
                   <TextField
-                    label="Notes"
+                    label="Ghi chú"
                     name="notes"
                     value={formData.notes}
                     onChange={handleChange}
@@ -411,7 +411,7 @@ const PaymentForm = () => {
                     multiline
                     rows={3}
                     disabled={saving}
-                    placeholder="Optional notes about this payment"
+                    placeholder="Ghi chú tùy chọn về thanh toán này"
                   />
                 </Grid>
                 
@@ -427,14 +427,14 @@ const PaymentForm = () => {
                           color="success"
                         />
                       }
-                      label="Verified"
+                      label="Đã xác nhận"
                     />
                   </Grid>
                 )}
                 {!admin && (
                   <Grid item xs={12}>
                     <Alert severity="info" sx={{ mt: 1 }}>
-                      Your payment will require verification by an administrator.
+                      Thanh toán của bạn sẽ cần được xác nhận bởi quản trị viên.
                     </Alert>
                   </Grid>
                 )}
@@ -449,7 +449,7 @@ const PaymentForm = () => {
                   startIcon={<ArrowBackIcon />}
                   disabled={saving}
                 >
-                  Cancel
+                  Hủy
                 </Button>
                 
                 <Button
@@ -461,10 +461,10 @@ const PaymentForm = () => {
                   {saving ? (
                     <>
                       <CircularProgress size={24} sx={{ mr: 1 }} color="inherit" />
-                      Saving...
+                      Đang lưu...
                     </>
                   ) : (
-                    isEdit ? 'Update Payment' : 'Create Payment'
+                    isEdit ? 'Cập nhật thanh toán' : 'Tạo thanh toán'
                   )}
                 </Button>
               </Box>

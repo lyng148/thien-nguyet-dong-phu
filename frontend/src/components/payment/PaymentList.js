@@ -201,11 +201,11 @@ const PaymentList = () => {
       } else {
         setPayments([]);
         setTotal(0);
-        setError('Invalid data format received from server');
+        setError('Dữ liệu nhận được từ máy chủ không hợp lệ');
       }
     } catch (error) {
       console.error('Error loading payments:', error);
-      setError('Failed to load payments. Please try again.');
+      setError('Không thể tải danh sách thanh toán. Vui lòng thử lại.');
       setPayments([]);
       setTotal(0);
     } finally {
@@ -285,16 +285,16 @@ const PaymentList = () => {
     try {
       setLoading(true);
       if (verified) {
-        await unverifyPayment(id); // Đã cập nhật để sử dụng PATCH trong paymentService.js
+        await unverifyPayment(id);
       } else {
-        await verifyPayment(id); // Đã cập nhật để sử dụng PATCH trong paymentService.js
+        await verifyPayment(id);
       }
       
       // Reload payments after verification change
       await loadPayments();
     } catch (error) {
       console.error('Error toggling verification status:', error);
-      setError(`Failed to ${verified ? 'unverify' : 'verify'} payment. Please try again.`);
+      setError(`Không thể ${verified ? 'hủy xác nhận' : 'xác nhận'} thanh toán. Vui lòng thử lại.`);
     } finally {
       setLoading(false);
     }
@@ -327,7 +327,7 @@ const PaymentList = () => {
       handleDeleteDialogClose();
     } catch (error) {
       console.error(`Delete payment ${paymentToDelete.id} error:`, error);
-      setError(`Failed to delete payment. Please try again.`);
+      setError(`Không thể xóa thanh toán. Vui lòng thử lại.`);
     } finally {
       setLoading(false);
     }
@@ -377,9 +377,9 @@ const PaymentList = () => {
 
   // Format currency
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'VND'
     }).format(amount);
   };
 
@@ -400,13 +400,13 @@ const PaymentList = () => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>Household</TableCell>
-            <TableCell>Fee</TableCell>
-            <TableCell align="right">Amount</TableCell>
-            <TableCell>Payment Date</TableCell>
-            <TableCell>Verification</TableCell>
-            <TableCell>Notes</TableCell>
-            <TableCell align="right">Actions</TableCell>
+            <TableCell>Hộ khẩu</TableCell>
+            <TableCell>Khoản thu</TableCell>
+            <TableCell align="right">Số tiền</TableCell>
+            <TableCell>Ngày thanh toán</TableCell>
+            <TableCell>Xác nhận</TableCell>
+            <TableCell>Ghi chú</TableCell>
+            <TableCell align="right">Hành động</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -428,7 +428,7 @@ const PaymentList = () => {
                 <TableCell>{formatDate(payment.paymentDate)}</TableCell>
                 <TableCell>
                   <Chip
-                    label={payment.verified ? "Verified" : "Unverified"}
+                    label={payment.verified ? "Đã xác nhận" : "Chưa xác nhận"}
                     color={payment.verified ? "success" : "default"}
                     size="small"
                     icon={payment.verified ? <VerifiedIcon /> : <UnverifiedIcon />}
@@ -442,7 +442,7 @@ const PaymentList = () => {
                 <TableCell align="right">
                   {isAdmin && (
                     <>
-                      <Tooltip title={payment.verified ? "Mark as Unverified" : "Verify Payment"}>
+                      <Tooltip title={payment.verified ? "Đánh dấu chưa xác nhận" : "Xác nhận thanh toán"}>
                         <IconButton
                           size="small"
                           onClick={() => handleToggleVerification(payment.id, payment.verified)}
@@ -451,7 +451,7 @@ const PaymentList = () => {
                           {payment.verified ? <UnverifiedIcon /> : <VerifiedIcon />}
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Delete Payment">
+                      <Tooltip title="Xóa thanh toán">
                         <IconButton
                           size="small"
                           onClick={() => handleDeleteDialogOpen(payment)}
@@ -462,7 +462,7 @@ const PaymentList = () => {
                       </Tooltip>
                     </>
                   )}
-                  <Tooltip title="Edit Payment">
+                  <Tooltip title="Chỉnh sửa thanh toán">
                     <IconButton
                       size="small"
                       onClick={() => handleEdit(payment.id)}
@@ -478,7 +478,7 @@ const PaymentList = () => {
             <TableRow>
               <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
                 <Typography variant="body1" color="textSecondary">
-                  No payments found matching your criteria
+                  Không tìm thấy thanh toán nào phù hợp với tiêu chí của bạn
                 </Typography>
                 <Button
                   variant="contained"
@@ -486,7 +486,7 @@ const PaymentList = () => {
                   onClick={() => navigate('/payments/add')}
                   sx={{ mt: 2 }}
                 >
-                  Add Payment
+                  Thêm thanh toán
                 </Button>
               </TableCell>
             </TableRow>
@@ -499,14 +499,14 @@ const PaymentList = () => {
   return (
     <Box>
       <PageHeader 
-        title="Payments" 
-        subtitle="Manage all payment records"
-        actionText="Add Payment"
+        title="Thanh toán" 
+        subtitle="Quản lý tất cả thanh toán"
+        actionText="Thêm thanh toán"
         actionIcon={<AddIcon />}
         onActionClick={() => navigate('/payments/add')}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Payments' }
+          { label: 'Bảng điều khiển', path: '/dashboard' },
+          { label: 'Thanh toán' }
         ]}
       />
 
@@ -518,9 +518,9 @@ const PaymentList = () => {
             onChange={handleTabChange}
             sx={{ borderBottom: 1, borderColor: 'divider' }}
           >
-            <Tab icon={<ListIcon />} label="All Payments" />
-            <Tab icon={<DescriptionIcon />} label="By Fee" />
-            <Tab icon={<HomeIcon />} label="By Household" />
+            <Tab icon={<ListIcon />} label="Tất cả thanh toán" />
+            <Tab icon={<DescriptionIcon />} label="Theo khoản thu" />
+            <Tab icon={<HomeIcon />} label="Theo hộ khẩu" />
           </Tabs>
           
           {/* Tab 1: All Payments */}
@@ -530,10 +530,10 @@ const PaymentList = () => {
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
-                  label="Search Payments"
+                  label="Tìm kiếm thanh toán"
                   value={searchTerm}
                   onChange={handleSearch}
-                  placeholder="Search by household, fee, or notes"
+                  placeholder="Tìm theo hộ khẩu, khoản thu hoặc ghi chú"
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -545,17 +545,17 @@ const PaymentList = () => {
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <FormControl fullWidth>
-                  <InputLabel id="verification-filter-label">Verification Status</InputLabel>
+                  <InputLabel id="verification-filter-label">Trạng thái xác nhận</InputLabel>
                   <Select
                     labelId="verification-filter-label"
                     id="verification-filter"
                     value={verificationFilter}
-                    label="Verification Status"
+                    label="Trạng thái xác nhận"
                     onChange={handleVerificationFilterChange}
                   >
-                    <MenuItem value="all">All Payments</MenuItem>
-                    <MenuItem value="verified">Verified Only</MenuItem>
-                    <MenuItem value="unverified">Unverified Only</MenuItem>
+                    <MenuItem value="all">Tất cả thanh toán</MenuItem>
+                    <MenuItem value="verified">Chỉ đã xác nhận</MenuItem>
+                    <MenuItem value="unverified">Chỉ chưa xác nhận</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -565,7 +565,7 @@ const PaymentList = () => {
                   startIcon={<AddIcon />}
                   onClick={() => navigate('/payments/add')}
                 >
-                  Add Payment
+                  Thêm thanh toán
                 </Button>
               </Grid>
             </Grid>
@@ -578,7 +578,7 @@ const PaymentList = () => {
                   sx={{ ml: 2 }} 
                   onClick={loadPayments}
                 >
-                  Retry
+                  Thử lại
                 </Button>
               </Alert>
             )}
@@ -596,7 +596,7 @@ const PaymentList = () => {
                   rowsPerPage={rowsPerPage}
                   onRowsPerPageChange={handleChangeRowsPerPage}
                   rowsPerPageOptions={[5, 10, 25]}
-                />
+                                  />
               </>
             )}
           </TabPanel>
@@ -605,17 +605,17 @@ const PaymentList = () => {
           <TabPanel value={tabValue} index={1}>
             <Box sx={{ mb: 3 }}>
               <FormControl fullWidth>
-                <InputLabel id="fee-select-label">Select Fee</InputLabel>
+                <InputLabel id="fee-select-label">Chọn khoản thu</InputLabel>
                 <Select
                   labelId="fee-select-label"
                   id="fee-select"
                   value={selectedFee}
-                  label="Select Fee"
+                  label="Chọn khoản thu"
                   onChange={handleFeeChange}
                   displayEmpty
                 >
                   <MenuItem value="">
-    
+                    <em>Chọn khoản thu...</em>
                   </MenuItem>
                   {fees.map((fee) => (
                     <MenuItem key={fee.id} value={fee.id}>
@@ -632,10 +632,10 @@ const PaymentList = () => {
               <>
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="h6">
-                    {fees.find(f => f.id === selectedFee)?.name} Payments
+                    Thanh toán khoản thu {fees.find(f => f.id === selectedFee)?.name}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    Showing all payments for this fee
+                    Hiển thị tất cả thanh toán cho khoản thu này
                   </Typography>
                 </Box>
                 {renderPaymentTable(feePayments)}
@@ -645,19 +645,19 @@ const PaymentList = () => {
                   <Box sx={{ mt: 3, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={4}>
-                        <Typography variant="body2" color="textSecondary">Total Households Paid</Typography>
+                        <Typography variant="body2" color="textSecondary">Tổng hộ khẩu đã nộp</Typography>
                         <Typography variant="h6">{feePayments.length}</Typography>
                       </Grid>
                       <Grid item xs={12} sm={4}>
-                        <Typography variant="body2" color="textSecondary">Total Amount Collected</Typography>
+                        <Typography variant="body2" color="textSecondary">Tổng số tiền đã thu</Typography>
                         <Typography variant="h6">
                           {formatCurrency(feePayments.reduce((sum, p) => sum + p.amount, 0))}
                         </Typography>
                       </Grid>
                       <Grid item xs={12} sm={4}>
-                        <Typography variant="body2" color="textSecondary">Verified Payments</Typography>
+                        <Typography variant="body2" color="textSecondary">Thanh toán đã xác nhận</Typography>
                         <Typography variant="h6">
-                          {feePayments.filter(p => p.verified).length} of {feePayments.length}
+                          {feePayments.filter(p => p.verified).length} / {feePayments.length}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -666,7 +666,7 @@ const PaymentList = () => {
               </>
             ) : (
               <Alert severity="info">
-                Please select a fee to view related payments
+                Vui lòng chọn một khoản thu để xem các thanh toán liên quan
               </Alert>
             )}
           </TabPanel>
@@ -675,21 +675,21 @@ const PaymentList = () => {
           <TabPanel value={tabValue} index={2}>
             <Box sx={{ mb: 3 }}>
               <FormControl fullWidth>
-                <InputLabel id="household-select-label">Select Household</InputLabel>
+                <InputLabel id="household-select-label">Chọn hộ khẩu</InputLabel>
                 <Select
                   labelId="household-select-label"
                   id="household-select"
                   value={selectedHousehold}
-                  label="Select Household"
+                  label="Chọn hộ khẩu"
                   onChange={handleHouseholdChange}
                   displayEmpty
                 >
                   <MenuItem value="">
-            
+                    <em>Chọn hộ khẩu...</em>
                   </MenuItem>
                   {households.map((household) => (
                     <MenuItem key={household.id} value={household.id}>
-                      {household.soHoKhau || 'N/A'} - {household.chuHo || household.ownerName}
+                      {household.soHoKhau || 'Không có'} - {household.chuHo || household.ownerName}
                     </MenuItem>
                   ))}
                 </Select>
@@ -702,10 +702,10 @@ const PaymentList = () => {
               <>
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="h6">
-                    {households.find(h => h.id === selectedHousehold)?.ownerName}'s Payments
+                    Thanh toán của {households.find(h => h.id === selectedHousehold)?.ownerName}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    Showing all payments made by this household
+                    Hiển thị tất cả thanh toán của hộ khẩu này
                   </Typography>
                 </Box>
                 {renderPaymentTable(householdPayments)}
@@ -715,17 +715,17 @@ const PaymentList = () => {
                   <Box sx={{ mt: 3, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={4}>
-                        <Typography variant="body2" color="textSecondary">Total Fees Paid</Typography>
+                        <Typography variant="body2" color="textSecondary">Tổng khoản thu đã nộp</Typography>
                         <Typography variant="h6">{householdPayments.length}</Typography>
                       </Grid>
                       <Grid item xs={12} sm={4}>
-                        <Typography variant="body2" color="textSecondary">Total Amount Paid</Typography>
+                        <Typography variant="body2" color="textSecondary">Tổng số tiền đã nộp</Typography>
                         <Typography variant="h6">
                           {formatCurrency(householdPayments.reduce((sum, p) => sum + p.amount, 0))}
                         </Typography>
                       </Grid>
                       <Grid item xs={12} sm={4}>
-                        <Typography variant="body2" color="textSecondary">Last Payment</Typography>
+                        <Typography variant="body2" color="textSecondary">Lần thanh toán cuối</Typography>
                         <Typography variant="h6">
                           {formatDate(householdPayments.sort((a, b) => 
                             new Date(b.paymentDate) - new Date(a.paymentDate))[0]?.paymentDate)}
@@ -737,7 +737,7 @@ const PaymentList = () => {
               </>
             ) : (
               <Alert severity="info">
-                Please select a household to view their payments
+                Vui lòng chọn một hộ khẩu để xem các thanh toán của họ
               </Alert>
             )}
           </TabPanel>
@@ -752,18 +752,18 @@ const PaymentList = () => {
         aria-describedby="delete-payment-dialog-description"
       >
         <DialogTitle id="delete-payment-dialog-title">
-          Delete Payment
+          Xóa thanh toán
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-payment-dialog-description">
-            Are you sure you want to delete this payment from {paymentToDelete?.householdOwnerName} 
-            for {paymentToDelete?.feeName} ({formatCurrency(paymentToDelete?.amount || 0)})?
-            This action cannot be undone.
+            Bạn có chắc chắn muốn xóa thanh toán này từ {paymentToDelete?.householdOwnerName} 
+            cho {paymentToDelete?.feeName} ({formatCurrency(paymentToDelete?.amount || 0)})?
+            Hành động này không thể hoàn tác.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeleteDialogClose}>
-            Cancel
+            Hủy
           </Button>
           <Button 
             onClick={handleDeletePayment} 
@@ -771,7 +771,7 @@ const PaymentList = () => {
             variant="contained"
             autoFocus
           >
-            Delete
+            Xóa
           </Button>
         </DialogActions>
       </Dialog>
