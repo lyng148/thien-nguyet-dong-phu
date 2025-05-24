@@ -268,15 +268,15 @@ const HouseholdDetail = () => {
   return (
     <Box>
       <PageHeader
-        title="Household Details"
-        subtitle={`Viewing details for ${household?.ownerName || 'household'}`}
-        actionText="Back to Households"
+        title="Chi tiết hộ khẩu"
+        subtitle={`Xem thông tin chi tiết cho hộ khẩu ${household?.ownerName || 'household'}`}
+        actionText="Trở về trang Hộ khẩu"
         actionIcon={<ArrowBackIcon />}
         onActionClick={() => navigate('/households')}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Households', path: '/households' },
-          { label: 'Details' }
+          { label: 'Bảng điều khiển', path: '/dashboard' },
+          { label: 'Hộ khẩu', path: '/households' },
+          { label: 'Chi tiết' }
         ]}
       />
 
@@ -291,11 +291,11 @@ const HouseholdDetail = () => {
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <Typography variant="h6" gutterBottom>
-                Household Information
+                Thông tin hộ khẩu
               </Typography>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Household Number
+                  Số hộ khẩu
                 </Typography>
                 <Typography variant="body1">
                   {household?.soHoKhau || 'N/A'}
@@ -303,7 +303,7 @@ const HouseholdDetail = () => {
               </Box>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Owner
+                  Chủ hộ
                 </Typography>
                 <Typography variant="body1">
                   {household?.ownerName}
@@ -311,7 +311,7 @@ const HouseholdDetail = () => {
               </Box>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Address
+                  Địa chỉ
                 </Typography>
                 <Typography variant="body1">
                   {household?.address}
@@ -320,11 +320,11 @@ const HouseholdDetail = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant="h6" gutterBottom>
-                Contact Information
+                Thông tin liên hệ
               </Typography>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Phone
+                  Số điện thoại
                 </Typography>
                 <Typography variant="body1">
                   {household?.phoneNumber || 'N/A'}
@@ -340,10 +340,10 @@ const HouseholdDetail = () => {
               </Box>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Status
+                  Trạng thái
                 </Typography>
                 <Chip 
-                  label={household?.active ? "Active" : "Inactive"} 
+                  label={household?.active ? "Hoạt động" : "Không hoạt động"} 
                   color={household?.active ? "success" : "default"}
                   size="small"
                 />
@@ -355,8 +355,8 @@ const HouseholdDetail = () => {
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="household detail tabs">
-          <Tab label="Household Members" icon={<PersonIcon />} iconPosition="start" />
-          <Tab label="Household History" icon={<HistoryIcon />} iconPosition="start" />
+          <Tab label="Nhân khẩu thuộc hộ khẩu" icon={<PersonIcon />} iconPosition="start" />
+          <Tab label="Lịch sử hộ khẩu" icon={<HistoryIcon />} iconPosition="start" />
         </Tabs>
       </Box>
 
@@ -364,7 +364,7 @@ const HouseholdDetail = () => {
       <TabPanel value={tabValue} index={0}>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6">
-            Household Members ({members.length})
+            Nhân khẩu ({members.length})
           </Typography>
           <Button 
             variant="contained" 
@@ -372,7 +372,7 @@ const HouseholdDetail = () => {
             onClick={handleOpenAddDialog}
             disabled={members.length > 0 && persons.length === members.length}
           >
-            Add Member
+            Thêm nhân khẩu
           </Button>
         </Box>
 
@@ -386,7 +386,7 @@ const HouseholdDetail = () => {
               startIcon={<AddIcon />} 
               onClick={handleOpenAddDialog}
             >
-              Add the first member
+              Thêm nhân khẩu đầu tiên
             </Button>
           </Paper>
         ) : (
@@ -428,13 +428,13 @@ const HouseholdDetail = () => {
       {/* History Tab */}
       <TabPanel value={tabValue} index={1}>
         <Typography variant="h6" sx={{ mb: 2 }}>
-          Household History ({history.length})
+          Lịch sử hộ khẩu ({history.length})
         </Typography>
 
         {history.length === 0 ? (
           <Paper sx={{ p: 3, textAlign: 'center' }}>
             <Typography color="text.secondary">
-              No household history found.
+              Không tìm thấy lịch sử hộ khẩu.
             </Typography>
           </Paper>
         ) : (
@@ -442,10 +442,10 @@ const HouseholdDetail = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Change Type</TableCell>
-                  <TableCell>Person</TableCell>
-                  <TableCell>Note</TableCell>
+                  <TableCell>Thời gian</TableCell>
+                  <TableCell>Loại thay đổi</TableCell>
+                  <TableCell>Nhân khẩu</TableCell>
+                  <TableCell>Ghi chú</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -475,20 +475,20 @@ const HouseholdDetail = () => {
 
       {/* Add Member Dialog */}
       <Dialog open={openAddDialog} onClose={handleCloseAddDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Household Member</DialogTitle>
+        <DialogTitle>Thêm nhân khẩu</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 1 }}>
             <TextField
               select
               fullWidth
-              label="Select Person"
+              label="Chọn nhân khẩu"
               value={addForm.nhanKhauId}
               onChange={(e) => setAddForm({ ...addForm, nhanKhauId: e.target.value })}
               margin="normal"
               variant="outlined"
               required
             >
-              <MenuItem value="">Select a person</MenuItem>
+              <MenuItem value="">Chọn nhân khẩu</MenuItem>
               {persons && persons.length > 0 ? (
                 // Get the list of available people (not already in any household)
                 (() => {
@@ -524,13 +524,13 @@ const HouseholdDetail = () => {
                   ));
                 })()
               ) : (
-                <MenuItem disabled>No available persons found</MenuItem>
+                <MenuItem disabled>Không tìm thấy nhân khẩu khả dụng</MenuItem>
               )}
             </TextField>
             
             <TextField
               fullWidth
-              label="Relationship to Household Owner"
+              label="Quan hệ với chủ hộ"
               value={addForm.relationship}
               onChange={(e) => setAddForm({ ...addForm, relationship: e.target.value })}
               margin="normal"
@@ -541,7 +541,7 @@ const HouseholdDetail = () => {
             
             <TextField
               fullWidth
-              label="Notes (Optional)"
+              label="Ghi chú (tùy chọn)"
               value={addForm.note}
               onChange={(e) => setAddForm({ ...addForm, note: e.target.value })}
               margin="normal"
@@ -565,17 +565,17 @@ const HouseholdDetail = () => {
 
       {/* Delete Member Dialog */}
       <Dialog open={deleteDialog.open} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Remove Household Member</DialogTitle>
+        <DialogTitle>Loại bỏ thành viên hộ khẩu</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to remove <strong>{deleteDialog.memberName}</strong> from this household? 
-            This action will be recorded in the household history.
+            Bạn có chắc chắn muốn loại bỏ <strong>{deleteDialog.memberName}</strong> khỏi hộ khẩu này? 
+            Hành động này sẽ được ghi lại trong lịch sử hộ khẩu.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+          <Button onClick={handleCloseDeleteDialog}>Hủy bỏ</Button>
           <Button onClick={handleRemoveMember} color="error" variant="contained">
-            Remove
+            Loại bỏ
           </Button>
         </DialogActions>
       </Dialog>

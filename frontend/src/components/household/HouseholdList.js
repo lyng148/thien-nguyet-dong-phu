@@ -170,14 +170,14 @@ const HouseholdList = () => {
   return (
     <Box>
       <PageHeader
-        title="Households"
-        subtitle="Manage apartment households"
-        actionText="Add Household"
+        title="Hộ khẩu"
+        subtitle="Quản lý hộ khẩu"
+        actionText="Thêm hộ khẩu"
         actionIcon={<AddIcon />}
         onActionClick={() => navigate('/households/add')}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Households' }
+          { label: 'Bảng điều khiển', path: '/dashboard' },
+          { label: 'Hộ khẩu' }
         ]}
       />
 
@@ -187,7 +187,7 @@ const HouseholdList = () => {
             <TextField
               sx={{ flexGrow: 1, mr: 2 }}
               variant="outlined"
-              placeholder="Search households by name, address or email..."
+              placeholder="Tìm theo tên, địa chỉ, email..."
               value={searchTerm}
               onChange={handleSearch}
               InputProps={{
@@ -207,7 +207,7 @@ const HouseholdList = () => {
                     color="primary"
                   />
                 }
-                label="Show Inactive"
+                label="Hiển thị không hoạt động"
                 sx={{ mr: 2 }}
               />
               <Button
@@ -242,12 +242,12 @@ const HouseholdList = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Owner Name</TableCell>
-                      <TableCell>Address</TableCell>
-                      <TableCell align="center">Members</TableCell>
-                      <TableCell>Contact</TableCell>
-                      <TableCell align="center">Status</TableCell>
-                      <TableCell align="right">Actions</TableCell>
+                      <TableCell>Chủ hộ</TableCell>
+                      <TableCell>Địa chỉ</TableCell>
+                      <TableCell align="center">Nhân khẩu</TableCell>
+                      <TableCell>Liên hệ</TableCell>
+                      <TableCell align="center">Trạng thái</TableCell>
+                      <TableCell align="right">Hành động</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -280,9 +280,9 @@ const HouseholdList = () => {
                             </Box>
                           </TableCell>
                           <TableCell align="center">
-                            <Tooltip title={`Click to ${household.active ? 'deactivate' : 'activate'}`}>
+                            <Tooltip title={`Nhấn để ${household.active ? 'Hủy kích hoạt' : 'kích hoạt'}`}>
                               <Chip
-                                label={household.active ? "Active" : "Inactive"}
+                                label={household.active ? "Hoạt động" : "Không hoạt động"}
                                 color={household.active ? "success" : "default"}
                                 size="small"
                                 onClick={() => handleToggleActive(household.id, household.active)}
@@ -291,7 +291,7 @@ const HouseholdList = () => {
                             </Tooltip>
                           </TableCell>
                           <TableCell align="right">
-                            <Tooltip title="View Details">
+                            <Tooltip title="Xem chi tiết">
                               <IconButton
                                 size="small"
                                 onClick={() => handleViewDetails(household.id)}
@@ -300,7 +300,7 @@ const HouseholdList = () => {
                                 <VisibilityIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip title="Edit">
+                            <Tooltip title="Sửa">
                               <IconButton
                                 size="small"
                                 onClick={() => handleEdit(household.id)}
@@ -308,7 +308,7 @@ const HouseholdList = () => {
                                 <EditIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip title={household.active ? "Deactivate" : "Permanently Delete"}>
+                            <Tooltip title={household.active ? "Hủy kích hoạt" : "Xóa vĩnh viễn"}>
                               <IconButton
                                 size="small"
                                 onClick={() => handleDeleteDialogOpen(household)}
@@ -324,7 +324,7 @@ const HouseholdList = () => {
                       <TableRow>
                         <TableCell colSpan={6} align="center">
                           <Typography variant="body1" color="text.secondary" gutterBottom>
-                            No households found.
+                            Không tìm thấy hộ khẩu.
                           </Typography>
                           <Button
                             variant="contained"
@@ -332,7 +332,7 @@ const HouseholdList = () => {
                             onClick={() => navigate('/households/add')}
                             sx={{ mt: 2 }}
                           >
-                            Add Household
+                            Thêm hộ khẩu
                           </Button>
 
                         </TableCell>
@@ -367,19 +367,19 @@ const HouseholdList = () => {
         aria-describedby="delete-household-dialog-description"
       >
         <DialogTitle id="delete-household-dialog-title">
-          {householdToDelete?.active ? "Deactivate Household" : "Delete Household"}
+          {householdToDelete?.active ? "Hủy kích hoạt hộ khẩu" : "Xóa hộ khẩu"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-household-dialog-description">
             {householdToDelete?.active
-              ? `Are you sure you want to deactivate household "${householdToDelete?.ownerName}"? The household will be marked as inactive.`
-              : `Are you sure you want to permanently delete household "${householdToDelete?.ownerName}"? This action cannot be undone.`
+              ? `Bạn có chắc chắn muốn hủy kích hoạt hộ khẩu \"${householdToDelete?.ownerName}\"? Hộ khẩu sẽ được đánh dấu là không hoạt động.`
+              : `Bạn có chắc chắn muốn xóa vĩnh viễn hộ khẩu \"${householdToDelete?.ownerName}\"? Hành động này không thể hoàn tác.`
             }
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeleteDialogClose}>
-            Cancel
+            Hủy bỏ
           </Button>
           <Button
             onClick={handleDelete}
@@ -387,7 +387,7 @@ const HouseholdList = () => {
             variant="contained"
             autoFocus
           >
-            {householdToDelete?.active ? "Deactivate" : "Delete"}
+            {householdToDelete?.active ? "Hủy kích hoạt" : "Xóa"}
           </Button>
         </DialogActions>
       </Dialog>

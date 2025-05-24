@@ -128,12 +128,12 @@ const UserList = () => {
   const handleSubmit = async () => {
     try {
       if (selectedUser) {
-        // Update existing user
+        // Update existing user - map role to vaiTro for the backend
         await userService.updateUser(selectedUser.id, {
           username: newUser.username,
           email: newUser.email,
           fullName: newUser.fullName,
-          role: newUser.role,
+          vaiTro: newUser.role,  // Map 'role' to 'vaiTro' for the backend
           enabled: newUser.enabled
         });
       } else {
