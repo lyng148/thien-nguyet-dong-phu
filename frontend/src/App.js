@@ -10,6 +10,8 @@ import Sidebar from './components/common/Sidebar';
 import Navbar from './components/common/Navbar';
 import Login from './components/auth/Login';
 import Dashboard from './components/dashboard/Dashboard';
+import AccountantDashboard from './components/dashboard/AccountantDashboard';
+import ToTruongDashboard from './components/dashboard/ToTruongDashboard';
 import HouseholdList from './components/household/HouseholdList';
 import HouseholdForm from './components/household/HouseholdForm';
 import FeeList from './components/fee/FeeList';
@@ -143,11 +145,27 @@ const App = () => {
               path="/dashboard" 
               element={
                 isAuthenticated ? (
-                  isToTruong() ? 
-                  <Navigate to="/households" replace /> : 
-                  isKeToan() ?
-                  <Navigate to="/fees" replace /> :
                   <Dashboard />
+                ) : <Navigate to="/login" replace />
+              } 
+            />
+            <Route 
+              path="/accountant-dashboard" 
+              element={
+                isAuthenticated ? (
+                  isKeToan() ? 
+                  <AccountantDashboard /> : 
+                  <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
+              } 
+            />
+            <Route 
+              path="/totruong-dashboard" 
+              element={
+                isAuthenticated ? (
+                  isToTruong() ? 
+                  <ToTruongDashboard /> : 
+                  <Navigate to="/dashboard" replace />
                 ) : <Navigate to="/login" replace />
               } 
             />

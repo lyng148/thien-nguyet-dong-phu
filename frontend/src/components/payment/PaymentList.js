@@ -402,7 +402,8 @@ const PaymentList = () => {
           <TableRow>
             <TableCell>Hộ khẩu</TableCell>
             <TableCell>Khoản thu</TableCell>
-            <TableCell align="right">Số tiền</TableCell>
+            <TableCell align="right">Số tiền yêu cầu</TableCell>
+            <TableCell align="right">Số tiền đã nộp</TableCell>
             <TableCell>Ngày thanh toán</TableCell>
             <TableCell>Xác nhận</TableCell>
             <TableCell>Ghi chú</TableCell>
@@ -423,6 +424,11 @@ const PaymentList = () => {
                 <TableCell align="right">
                   <Typography fontWeight="medium">
                     {formatCurrency(payment.amount)}
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography fontWeight="medium" color={payment.amountPaid < payment.amount ? "warning.main" : "success.main"}>
+                    {formatCurrency(payment.amountPaid || 0)}
                   </Typography>
                 </TableCell>
                 <TableCell>{formatDate(payment.paymentDate)}</TableCell>
@@ -476,7 +482,7 @@ const PaymentList = () => {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+              <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
                 <Typography variant="body1" color="textSecondary">
                   Không tìm thấy thanh toán nào phù hợp với tiêu chí của bạn
                 </Typography>
@@ -651,7 +657,7 @@ const PaymentList = () => {
                       <Grid item xs={12} sm={4}>
                         <Typography variant="body2" color="textSecondary">Tổng số tiền đã thu</Typography>
                         <Typography variant="h6">
-                          {formatCurrency(feePayments.reduce((sum, p) => sum + p.amount, 0))}
+                          {formatCurrency(feePayments.reduce((sum, p) => sum + (p.amountPaid || 0), 0))}
                         </Typography>
                       </Grid>
                       <Grid item xs={12} sm={4}>
@@ -721,7 +727,7 @@ const PaymentList = () => {
                       <Grid item xs={12} sm={4}>
                         <Typography variant="body2" color="textSecondary">Tổng số tiền đã nộp</Typography>
                         <Typography variant="h6">
-                          {formatCurrency(householdPayments.reduce((sum, p) => sum + p.amount, 0))}
+                          {formatCurrency(householdPayments.reduce((sum, p) => sum + (p.amountPaid || 0), 0))}
                         </Typography>
                       </Grid>
                       <Grid item xs={12} sm={4}>

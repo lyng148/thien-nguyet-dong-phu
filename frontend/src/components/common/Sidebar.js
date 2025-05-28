@@ -34,6 +34,24 @@ const menuItems = [
     hideForKeToan: true
   },
   { 
+    text: 'Bảng điều khiển TT', 
+    icon: <DashboardIcon />, 
+    path: '/totruong-dashboard',
+    adminOnly: false,
+    hideForToTruong: false,
+    hideForKeToan: true,
+    showOnlyForToTruong: true
+  },
+  { 
+    text: 'Bảng điều khiển KT', 
+    icon: <DashboardIcon />, 
+    path: '/accountant-dashboard',
+    adminOnly: false,
+    hideForToTruong: true,
+    hideForKeToan: false,
+    showOnlyForKeToan: true
+  },
+  { 
     text: 'Hộ khẩu', 
     icon: <PeopleIcon />, 
     path: '/households',
@@ -98,9 +116,11 @@ const Sidebar = ({ open }) => {
   const keToan = isKeToan();
   
   const visibleMenuItems = menuItems.filter(item => 
-    (!item.adminOnly || admin) && 
+    (!item.adminOnly || admin) &&
     !(toTruong && item.hideForToTruong) &&
-    !(keToan && item.hideForKeToan)
+    !(keToan && item.hideForKeToan) &&
+    (!item.showOnlyForKeToan || keToan) &&
+    (!item.showOnlyForToTruong || toTruong)
   );
 
   return (

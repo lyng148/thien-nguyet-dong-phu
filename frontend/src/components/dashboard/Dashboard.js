@@ -30,12 +30,26 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 
 import PageHeader from '../common/PageHeader';
 import DashboardCard from './DashboardCard';
+import AccountantDashboard from './AccountantDashboard';
+import ToTruongDashboard from './ToTruongDashboard';
 import { getDashboardSummary, getRecentPayments, getMonthlyPaymentData } from '../../services/dashboardService';
-import { isAdmin } from '../../utils/auth';
+import { isAdmin, isKeToan, isToTruong } from '../../utils/auth';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const admin = isAdmin();
+  const keToan = isKeToan();
+  const toTruong = isToTruong();
+  
+  // If user is Kế toán (Accountant), show specialized dashboard
+  if (keToan && !admin) {
+    return <AccountantDashboard />;
+  }
+  
+  // If user is Tổ trưởng (Group Leader), show specialized dashboard
+  if (toTruong && !admin) {
+    return <ToTruongDashboard />;
+  }
   
   // State
   const [loading, setLoading] = useState(true);
@@ -101,8 +115,8 @@ const Dashboard = () => {
   return (
     <Box>
       <PageHeader 
-        title="Bảng Điều Khiển" 
-        subtitle="Tổng quan về thu phí và quản lý căn hộ"
+        title={toTruong ? "Bảng Điều Khiển Tổ Trưởng" : "Bảng Điều Khiển"} 
+        subtitle={toTruong ? "Quản lý hộ khẩu và tổng quan hệ thống" : "Tổng quan về thu phí và quản lý căn hộ"}
       />
 
       {loading ? (
@@ -222,7 +236,7 @@ const Dashboard = () => {
                           <TableRow>
                             <TableCell>Hộ Khẩu</TableCell>
                             <TableCell>Phí</TableCell>
-                            <TableCell align="right">Số Tiền</TableCell>
+                            <TableCell align="right">Số Tiền Đã Nộp</TableCell>
                             <TableCell align="center">Trạng Thái</TableCell>
                           </TableRow>
                         </TableHead>
@@ -231,7 +245,7 @@ const Dashboard = () => {
                             <TableRow key={payment.id}>
                               <TableCell>{payment.householdOwnerName}</TableCell>
                               <TableCell>{payment.feeName}</TableCell>
-                              <TableCell align="right">{formatCurrency(payment.amount)}</TableCell>
+                              <TableCell align="right">{formatCurrency(payment.amountPaid || 0)}</TableCell>
                               <TableCell align="center">
                                 <Chip
                                   label={payment.verified ? "Đã Xác Nhận" : "Chưa Xác Nhận"}
