@@ -85,6 +85,7 @@ public class HoKhauController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TO_TRUONG')")
     public ResponseEntity<HoKhau> createHoKhau(@RequestBody HoKhau hoKhau) {
         log.info("Creating new ho khau: {}", hoKhau);
         HoKhau created = hoKhauService.createHoKhau(hoKhau);
@@ -93,7 +94,7 @@ public class HoKhauController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TO_TRUONG')")
     public ResponseEntity<HoKhau> updateHoKhau(@PathVariable Long id, @RequestBody HoKhau hoKhau) {
         log.info("Updating ho khau with id: {}", id);
         HoKhau updated = hoKhauService.updateHoKhau(id, hoKhau);
@@ -176,7 +177,7 @@ public class HoKhauController {
     }
     
     @PostMapping("/{id}/members")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TO_TRUONG')")
     public ResponseEntity<HoKhau> addMemberToHoKhau(
             @PathVariable Long id,
             @RequestBody HoKhauNhanKhauRequest request) {
@@ -197,7 +198,7 @@ public class HoKhauController {
     }
     
     @DeleteMapping("/{hoKhauId}/members/{nhanKhauId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TO_TRUONG')")
     public ResponseEntity<HoKhau> removeMemberFromHoKhau(
             @PathVariable Long hoKhauId,
             @PathVariable Long nhanKhauId,

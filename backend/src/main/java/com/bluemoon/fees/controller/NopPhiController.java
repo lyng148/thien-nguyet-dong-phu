@@ -79,6 +79,7 @@ public class NopPhiController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('KE_TOAN')")
     public ResponseEntity<NopPhi> createNopPhi(@RequestBody NopPhi nopPhi) {
         log.info("Creating new payment: {}", nopPhi);
         
@@ -147,7 +148,7 @@ public class NopPhiController {
     }
 
     @PatchMapping("/{id}/verify")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('KE_TOAN')")
     public ResponseEntity<?> verifyNopPhi(@PathVariable Long id) {
         log.info("Verifying payment with id: {}", id);
         nopPhiService.verifyNopPhi(id);
@@ -156,7 +157,7 @@ public class NopPhiController {
     }
 
     @PatchMapping("/{id}/unverify")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('KE_TOAN')")
     public ResponseEntity<?> unverifyNopPhi(@PathVariable Long id) {
         log.info("Unverifying payment with id: {}", id);
         nopPhiService.unverifyNopPhi(id);

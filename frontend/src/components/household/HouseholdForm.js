@@ -18,13 +18,15 @@ import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-materia
 
 import PageHeader from '../common/PageHeader';
 import { getHouseholdById, createHousehold, updateHousehold } from '../../services/householdService';
-import { isAdmin } from '../../utils/auth';
+import { isAdmin, isToTruong } from '../../utils/auth';
 
 const HouseholdForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = Boolean(id);
   const admin = isAdmin();
+  const toTruong = isToTruong();
+  const canCreateActive = admin || toTruong; // Both admin and tổ trưởng can create active households
   
   // Form state
   const [formData, setFormData] = useState({
@@ -33,7 +35,7 @@ const HouseholdForm = () => {
     numMembers: 1, // Keeping this with default value of 1, but will hide from UI
     phoneNumber: '',
     email: '',
-    active: admin, // Only set active to true by default if user is admin
+    active: canCreateActive, // Set active to true by default if user is admin or tổ trưởng
     // New fields
     soHoKhau: '',
     soNha: '',
@@ -121,7 +123,7 @@ const HouseholdForm = () => {
         ...formData,
         address: constructedAddress, // Set address to the constructed string
         numMembers: formData.numMembers ? parseInt(formData.numMembers, 10) : 1,
-        active: admin ? formData.active : false // Force inactive if not admin
+        active: canCreateActive ? formData.active : false // Force inactive if not admin or tổ trưởng
       };
       
       // Log data for debugging
@@ -139,7 +141,7 @@ const HouseholdForm = () => {
         console.log('Creating new household');
         result = await createHousehold(householdData);
         console.log('Household created successfully:', result);
-        setSuccess('Tạo hộ khẩu thành công' + (!admin ? ' (Đang chờ phê duyệt)' : ''));
+        setSuccess('Tạo hộ khẩu thành công' + (!canCreateActive ? ' (Đang chờ phê duyệt)' : ''));
       }
       
       // Redirect after successful save
@@ -346,7 +348,7 @@ const HouseholdForm = () => {
                   />
                 </Grid>
                 
-                {admin && (
+                {canCreateActive && (
                   <Grid item xs={12}>
                     <FormControlLabel
                       control={
@@ -362,7 +364,7 @@ const HouseholdForm = () => {
                     />
                   </Grid>
                 )}
-                {!admin && (
+                {!canCreateActive && (
                   <Grid item xs={12}>
                     <Alert severity="info" sx={{ mt: 1 }}>
                       Việc đăng ký hộ gia đình của bạn sẽ cần được quản trị viên phê duyệt.

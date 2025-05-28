@@ -56,32 +56,33 @@ public class KhoanThuController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('KE_TOAN')")
     public ResponseEntity<KhoanThu> createKhoanThu(@RequestBody KhoanThu khoanThu) {
         return ResponseEntity.ok(khoanThuService.createKhoanThu(khoanThu));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('KE_TOAN')")
     public ResponseEntity<KhoanThu> updateKhoanThu(@PathVariable Long id, @RequestBody KhoanThu khoanThu) {
         return ResponseEntity.ok(khoanThuService.updateKhoanThu(id, khoanThu));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('KE_TOAN')")
     public ResponseEntity<?> deleteKhoanThu(@PathVariable Long id) {
         khoanThuService.deleteById(id);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/activate")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('KE_TOAN')")
     public ResponseEntity<?> activateKhoanThu(@PathVariable Long id) {
         khoanThuService.activateKhoanThu(id);
         return ResponseEntity.ok().build();
     }
     
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('KE_TOAN')")
     public ResponseEntity<?> toggleKhoanThuStatus(@PathVariable Long id, @RequestBody Map<String, Boolean> statusMap) {
         boolean hoatDong = statusMap.getOrDefault("hoatDong", false);
         if (hoatDong) {

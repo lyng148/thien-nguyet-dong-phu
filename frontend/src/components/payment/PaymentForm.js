@@ -26,13 +26,13 @@ import PageHeader from '../common/PageHeader';
 import { getPaymentById, createPayment, updatePayment, getPaymentByHouseholdAndFee } from '../../services/paymentService';
 import { getAllHouseholds } from '../../services/householdService';
 import { getAllFees } from '../../services/feeService';
-import { isAdmin } from '../../utils/auth';
+import { canAccessFeeManagement } from '../../utils/auth';
 
 const PaymentForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = Boolean(id);
-  const admin = isAdmin();
+  const canManageFees = canAccessFeeManagement();
   
   // Form state
   const [formData, setFormData] = useState({
@@ -221,7 +221,7 @@ const PaymentForm = () => {
         amount: parseFloat(formData.amount),
         amountPaid: parseFloat(formData.amountPaid || formData.amount),
         paymentDate: formData.paymentDate,
-        verified: admin ? formData.verified : false,
+        verified: canManageFees ? formData.verified : false,
         notes: formData.notes || '',
         payerName: formData.payerName || '' // Added new field
       };
@@ -233,7 +233,7 @@ const PaymentForm = () => {
         setSuccess('Cập nhật thanh toán thành công');
       } else {
         await createPayment(paymentData);
-        setSuccess('Tạo thanh toán thành công' + (!admin ? ' (Đang chờ xác nhận)' : ''));
+        setSuccess('Tạo thanh toán thành công' + (!canManageFees ? ' (Đang chờ xác nhận)' : ''));
       }
       
       // Redirect after successful save
@@ -415,7 +415,7 @@ const PaymentForm = () => {
                   />
                 </Grid>
                 
-                {admin && (
+                {canManageFees && (
                   <Grid item xs={12}>
                     <FormControlLabel
                       control={
@@ -431,7 +431,7 @@ const PaymentForm = () => {
                     />
                   </Grid>
                 )}
-                {!admin && (
+                {!canManageFees && (
                   <Grid item xs={12}>
                     <Alert severity="info" sx={{ mt: 1 }}>
                       Thanh toán của bạn sẽ cần được xác nhận bởi quản trị viên.

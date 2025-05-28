@@ -42,11 +42,11 @@ import {
 
 import PageHeader from '../common/PageHeader';
 import { getAllFees, toggleFeeStatus, deleteFee } from '../../services/feeService';
-import { isAdmin } from '../../utils/auth';
+import { canAccessFeeManagement } from '../../utils/auth';
 
 const FeeList = () => {
   const navigate = useNavigate();
-  const admin = isAdmin();
+  const canManageFees = canAccessFeeManagement();
 
   // State
   const [fees, setFees] = useState([]);
@@ -198,9 +198,9 @@ const FeeList = () => {
       <PageHeader 
         title="Quản lý khoản thu" 
         subtitle="Quản lý các khoản thu chung cư và lịch thanh toán"
-        actionText="Thêm khoản thu"
-        actionIcon={<AddIcon />}
-        onActionClick={() => navigate('/fees/add')}
+        actionText={canManageFees ? "Thêm khoản thu" : undefined}
+        actionIcon={canManageFees ? <AddIcon /> : undefined}
+        onActionClick={canManageFees ? () => navigate('/fees/add') : undefined}
         breadcrumbs={[
           { label: 'Trang chủ', path: '/dashboard' },
           { label: 'Quản lý khoản thu' }
@@ -272,7 +272,7 @@ const FeeList = () => {
                   <Typography variant="body1" color="text.secondary" gutterBottom>
                     Không tìm thấy khoản thu nào.
                   </Typography>
-                  {admin && (
+                  {canManageFees && (
                     <Button 
                       variant="contained" 
                       startIcon={<AddIcon />}
@@ -331,13 +331,13 @@ const FeeList = () => {
                               <IconButton
                                 size="small"
                                 onClick={() => handleEdit(fee.id)}
-                                disabled={!admin}
+                                disabled={!canManageFees}
                               >
                                 <EditIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
                             
-                            {admin && (
+                            {canManageFees && (
                               <>
                                 <Tooltip title={fee.active ? 'Ngừng hoạt động' : 'Kích hoạt'}>
                                   <IconButton

@@ -23,13 +23,13 @@ import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-materia
 
 import PageHeader from '../common/PageHeader';
 import { getFeeById, createFee, updateFee } from '../../services/feeService';
-import { isAdmin } from '../../utils/auth';
+import { isAdmin, canAccessFeeManagement } from '../../utils/auth';
 
 const FeeForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = Boolean(id);
-  const admin = isAdmin();
+  const canManageFees = canAccessFeeManagement();
   
   // Form state
   const [formData, setFormData] = useState({
@@ -38,7 +38,7 @@ const FeeForm = () => {
     amount: '',
     dueDate: '',
     description: '',
-    active: admin, 
+    active: canManageFees, 
     ngayTao: formatDateForInput(new Date())
   });
   
@@ -117,7 +117,7 @@ const FeeForm = () => {
         amount: parseFloat(formData.amount),
         dueDate: formData.dueDate,
         description: formData.description,
-        active: admin ? formData.active : false, // Force inactive if not admin
+        active: canManageFees ? formData.active : false, // Force inactive if not admin/ke_toan
         ngayTao: formData.ngayTao
       };
       
@@ -129,7 +129,7 @@ const FeeForm = () => {
       } else {
         result = await createFee(feeData);
         console.log('Fee created successfully:', result);
-        setSuccess('Tạo khoản thu thành công' + (!admin ? ' (Đang chờ phê duyệt)' : ''));
+        setSuccess('Tạo khoản thu thành công' + (!canManageFees ? ' (Đang chờ phê duyệt)' : ''));
       }
       
       // Redirect after successful save
@@ -297,7 +297,7 @@ const FeeForm = () => {
                   />
                 </Grid>
                 
-                {admin && (
+                {canManageFees && (
                   <Grid item xs={12}>
                     <FormControlLabel
                       control={
@@ -313,7 +313,7 @@ const FeeForm = () => {
                     />
                   </Grid>
                 )}
-                {!admin && (
+                {!canManageFees && (
                   <Grid item xs={12}>
                     <Alert severity="info" sx={{ mt: 1 }}>
                       Việc tạo khoản thu của bạn sẽ cần được quản trị viên phê duyệt.

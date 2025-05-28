@@ -50,8 +50,7 @@ import PageHeader from '../common/PageHeader';
 import { getAllPayments, verifyPayment, unverifyPayment, deletePayment } from '../../services/paymentService';
 import { getAllFees } from '../../services/feeService';
 import { getAllHouseholds } from '../../services/householdService';
-import { ROLE_ADMIN } from '../../config/constants';
-import { isAdmin as checkIsAdmin } from '../../utils/auth';
+import { canAccessFeeManagement } from '../../utils/auth';
 
 // TabPanel component for handling tab content display
 function TabPanel(props) {
@@ -78,7 +77,7 @@ const PaymentList = () => {
   const navigate = useNavigate();
   
   // Get user role from auth utility
-  const isAdmin = checkIsAdmin();
+  const canManageFees = canAccessFeeManagement();
   
   // Tab state
   const [tabValue, setTabValue] = useState(0);
@@ -446,7 +445,7 @@ const PaymentList = () => {
                   </Typography>
                 </TableCell>
                 <TableCell align="right">
-                  {isAdmin && (
+                  {canManageFees && (
                     <>
                       <Tooltip title={payment.verified ? "Đánh dấu chưa xác nhận" : "Xác nhận thanh toán"}>
                         <IconButton
@@ -486,14 +485,16 @@ const PaymentList = () => {
                 <Typography variant="body1" color="textSecondary">
                   Không tìm thấy thanh toán nào phù hợp với tiêu chí của bạn
                 </Typography>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => navigate('/payments/add')}
-                  sx={{ mt: 2 }}
-                >
-                  Thêm thanh toán
-                </Button>
+                {canManageFees && (
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => navigate('/payments/add')}
+                    sx={{ mt: 2 }}
+                  >
+                    Thêm thanh toán
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           )}
@@ -507,9 +508,9 @@ const PaymentList = () => {
       <PageHeader 
         title="Thanh toán" 
         subtitle="Quản lý tất cả thanh toán"
-        actionText="Thêm thanh toán"
-        actionIcon={<AddIcon />}
-        onActionClick={() => navigate('/payments/add')}
+        actionText={canManageFees ? "Thêm thanh toán" : undefined}
+        actionIcon={canManageFees ? <AddIcon /> : undefined}
+        onActionClick={canManageFees ? () => navigate('/payments/add') : undefined}
         breadcrumbs={[
           { label: 'Bảng điều khiển', path: '/dashboard' },
           { label: 'Thanh toán' }
@@ -566,13 +567,15 @@ const PaymentList = () => {
                 </FormControl>
               </Grid>
               <Grid item xs={12} md={5} display="flex" justifyContent="flex-end">
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => navigate('/payments/add')}
-                >
-                  Thêm thanh toán
-                </Button>
+                {canManageFees && (
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => navigate('/payments/add')}
+                  >
+                    Thêm thanh toán
+                  </Button>
+                )}
               </Grid>
             </Grid>
             
