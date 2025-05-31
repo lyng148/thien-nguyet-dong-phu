@@ -68,6 +68,24 @@ export const getAllPeople = async (filters = {}) => {
   }
 };
 
+// Check if CCCD is unique
+export const checkCCCDUnique = async (cccd, excludePersonId = null) => {
+  try {
+    // Get all people first
+    const people = await getAllPeople();
+    
+    // Check if any person (except the current one) has the same CCCD
+    const existingPerson = people.find(
+      person => person.cccd === cccd && person.id !== excludePersonId
+    );
+    
+    return !existingPerson; // Return true if CCCD is unique
+  } catch (error) {
+    console.error('Error checking CCCD uniqueness:', error);
+    throw error;
+  }
+};
+
 // Get a person by ID
 export const getPersonById = async (id) => {
   try {

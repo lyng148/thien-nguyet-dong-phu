@@ -36,7 +36,8 @@ import {
   Delete as DeleteIcon,
   History as HistoryIcon,
   Add as AddIcon,
-  ArrowBack as ArrowBackIcon
+  ArrowBack as ArrowBackIcon,
+  DirectionsCar as VehicleIcon
 } from '@mui/icons-material';
 import {
   getHouseholdById,
@@ -46,6 +47,7 @@ import {
 } from '../../services/householdService';
 import { getAllPeople } from '../../services/personService';
 import { getHistoryByHousehold } from '../../services/householdHistoryService';
+import vehicleService from '../../services/vehicleService';
 import PageHeader from '../common/PageHeader';
 
 // TabPanel component for displaying tab content
@@ -76,6 +78,7 @@ const HouseholdDetail = () => {
   const [members, setMembers] = useState([]);
   const [history, setHistory] = useState([]);
   const [persons, setPersons] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
   const [addForm, setAddForm] = useState({ nhanKhauId: '', relationship: '', note: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -125,6 +128,15 @@ const HouseholdDetail = () => {
           console.error('Error loading persons list:', personErr);
           // Continue without throwing
           setPersons([]);
+        }
+
+        // Try to fetch vehicles for this household
+        try {
+          const vehicleData = await vehicleService.getVehiclesByHousehold(id);
+          setVehicles(Array.isArray(vehicleData.data) ? vehicleData.data : []);
+        } catch (vehicleErr) {
+          console.error('Error loading household vehicles:', vehicleErr);
+          setVehicles([]);
         }
       } catch (err) {
         console.error('Error loading household data:', err);
@@ -356,6 +368,7 @@ const HouseholdDetail = () => {
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="household detail tabs">
           <Tab label="Nhân khẩu thuộc hộ khẩu" icon={<PersonIcon />} iconPosition="start" />
+          <Tab label="Phương tiện" icon={<VehicleIcon />} iconPosition="start" />
           <Tab label="Lịch sử hộ khẩu" icon={<HistoryIcon />} iconPosition="start" />
         </Tabs>
       </Box>
@@ -425,8 +438,118 @@ const HouseholdDetail = () => {
         )}
       </TabPanel>
 
-      {/* History Tab */}
+      {/* Vehicles Tab */}
       <TabPanel value={tabValue} index={1}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6">
+            Phương tiện ({vehicles.length})
+          </Typography>
+          <Button 
+            variant="contained" 
+            startIcon={<AddIcon />} 
+            onClick={() => navigate(`/vehicles/add?householdId=${id}`)}
+          >
+            Thêm phương tiện
+          </Button>
+        </Box>
+
+        {vehicles.length === 0 ? (
+          <Paper sx={{ p: 3, textAlign: 'center' }}>
+            <Typography color="text.secondary" sx={{ mb: 2 }}>
+              Chưa có phương tiện nào được đăng ký.
+            </Typography>
+            <Button 
+              variant="outlined" 
+              startIcon={<AddIcon />} 
+              onClick={() => navigate(`/vehicles/add?householdId=${id}`)}
+            >
+              Đăng ký phương tiện đầu tiên
+            </Button>
+          </Paper>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Biển số xe</TableCell>
+                  <TableCell>Loại xe</TableCell>
+                  <TableCell>Hãng xe</TableCell>
+                  <TableCell>Chủ sở hữu</TableCell>
+                  <TableCell>Phí hàng tháng</TableCell>
+                  <TableCell align="right">Thao tác</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {vehicles.map((vehicle) => {
+                  const getVehicleTypeText = (type) => {
+                    return type === 'XE_MAY' ? 'Xe máy' : 'Ô tô';
+                  };
+                  
+                  const getMonthlyFee = (type) => {
+                    const fee = type === 'XE_MAY' ? 70000 : 1200000;
+                    return new Intl.NumberFormat('vi-VN', {
+                      style: 'currency',
+                      currency: 'VND'
+                    }).format(fee);
+                  };
+
+                  const getVehicleTypeColor = (type) => {
+                    return type === 'XE_MAY' ? 'primary' : 'success';
+                  };
+
+                  return (
+                    <TableRow key={vehicle.id}>
+                      <TableCell>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                          {vehicle.licensePlate}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={getVehicleTypeText(vehicle.vehicleType)} 
+                          color={getVehicleTypeColor(vehicle.vehicleType)}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {vehicle.brand || 'N/A'}
+                        {vehicle.model && ` ${vehicle.model}`}
+                      </TableCell>
+                      <TableCell>{vehicle.ownerName}</TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 'medium', color: 'success.main' }}>
+                          {getMonthlyFee(vehicle.vehicleType)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Stack direction="row" spacing={1} justifyContent="flex-end">
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => navigate(`/vehicles/${vehicle.id}`)}
+                          >
+                            Xem
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            onClick={() => navigate(`/vehicles/edit/${vehicle.id}`)}
+                          >
+                            Sửa
+                          </Button>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </TabPanel>
+
+      {/* History Tab */}
+      <TabPanel value={tabValue} index={2}>
         <Typography variant="h6" sx={{ mb: 2 }}>
           Lịch sử hộ khẩu ({history.length})
         </Typography>

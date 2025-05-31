@@ -35,7 +35,8 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Refresh as RefreshIcon,
-  Person as PersonIcon
+  Person as PersonIcon,
+  Visibility as VisibilityIcon
 } from '@mui/icons-material';
 
 import PageHeader from '../common/PageHeader';
@@ -100,7 +101,6 @@ const PersonList = () => {
   const handleRefresh = () => {
     fetchPeople();
   };
-
   // Handle create/edit
   const handleOpenForm = (person = null) => {
     if (person) {
@@ -108,6 +108,11 @@ const PersonList = () => {
     } else {
       navigate('/persons/add');
     }
+  };
+  
+  // Handle view person details
+  const handleViewDetails = (personId) => {
+    navigate(`/persons/${personId}`);
   };
 
   // Handle form close
@@ -322,11 +327,21 @@ const PersonList = () => {
                         <TableRow key={person.id}>
                           <TableCell>{person.fullName}</TableCell>
                           <TableCell>{formatDate(person.dateOfBirth)}</TableCell>
-                          <TableCell>{person.gender}</TableCell>
-                          <TableCell align="right">
-                            <Tooltip title="Chi tiết/Sửa">
+                          <TableCell>{person.gender}</TableCell>                          <TableCell align="right">
+                            <Tooltip title="Xem chi tiết">
                               <IconButton
                                 size="small"
+                                color="primary"
+                                onClick={() => handleViewDetails(person.id)}
+                              >
+                                <VisibilityIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            
+                            <Tooltip title="Chỉnh sửa">
+                              <IconButton
+                                size="small"
+                                color="secondary"
                                 onClick={() => handleOpenForm(person)}
                               >
                                 <EditIcon fontSize="small" />

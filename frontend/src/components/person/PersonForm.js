@@ -14,12 +14,13 @@ import {
   Alert,
   CircularProgress,
   Divider,
-  Typography
+  Typography,
+  FormHelperText
 } from '@mui/material';
 import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 
 import PageHeader from '../common/PageHeader';
-import { getPersonById, createPerson, updatePerson } from '../../services/personService';
+import { getPersonById, createPerson, updatePerson, checkCCCDUnique } from '../../services/personService';
 import { isAdmin } from '../../utils/auth';
 
 const PersonForm = () => {
@@ -27,8 +28,7 @@ const PersonForm = () => {
   const navigate = useNavigate();
   const isEdit = Boolean(id);
   const admin = isAdmin();
-  
-  // Form state
+    // Form state
   const [formData, setFormData] = useState({
     hoTen: '',
     ngaySinh: '',
@@ -47,6 +47,11 @@ const PersonForm = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState({
+    cccd: ''
+  });
 
   // Load person data if editing
   useEffect(() => {
@@ -83,28 +88,84 @@ const PersonForm = () => {
     };
     
     fetchPerson();
-  }, [isEdit, id]);
-
-  // Handle form changes
+  }, [isEdit, id]);  // Handle form changes
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+    
+    // Validate CCCD if that's the field being changed
+    if (name === 'cccd') {
+      // Clear previous errors
+      setValidationErrors(prev => ({
+        ...prev,
+        cccd: ''
+      }));
+      
+      // Check if it's exactly 12 digits
+      if (value && !/^\d{12}$/.test(value)) {
+        setValidationErrors(prev => ({
+          ...prev,
+          cccd: 'CCCD phải có đúng 12 chữ số'
+        }));
+      } 
+      // If the CCCD is 12 digits, check if it's unique (debounced)
+      else if (value && value.length === 12) {
+        validateCCCDUniqueness(value);
+      }
+    }
   };
-
+  
+  // Debounce function to avoid too many API calls while typing
+  const validateCCCDUniqueness = async (cccd) => {
+    try {
+      const isCCCDUnique = await checkCCCDUnique(cccd, isEdit ? parseInt(id) : null);
+      if (!isCCCDUnique) {
+        setValidationErrors(prev => ({
+          ...prev,
+          cccd: 'CCCD này đã được sử dụng cho người khác'
+        }));
+      }
+    } catch (error) {
+      console.error('Error checking CCCD uniqueness:', error);
+    }
+  };
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
     setSaving(true);
+    setValidationErrors({ cccd: '' });
     
     try {
       // Validate form data
       if (!formData.hoTen || !formData.ngaySinh || !formData.gioiTinh) {
         throw new Error('Vui lòng điền đầy đủ các trường bắt buộc');
+      }
+      
+      // Validate CCCD format if provided
+      if (formData.cccd) {
+        if (!/^\d{12}$/.test(formData.cccd)) {
+          setValidationErrors(prev => ({
+            ...prev,
+            cccd: 'CCCD phải có đúng 12 chữ số'
+          }));
+          throw new Error('CCCD phải có đúng 12 chữ số');
+        }
+        
+        // Check if CCCD is unique
+        const isCCCDUnique = await checkCCCDUnique(formData.cccd, isEdit ? parseInt(id) : null);
+        if (!isCCCDUnique) {
+          setValidationErrors(prev => ({
+            ...prev,
+            cccd: 'CCCD này đã được sử dụng cho người khác'
+          }));
+          throw new Error('CCCD này đã được sử dụng cho người khác');
+        }
       }
 
       // Create person data object
@@ -287,15 +348,21 @@ const PersonForm = () => {
                     disabled={saving}
                   />
                 </Grid>
-                
-                <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6}>
                   <TextField
                     label="Số CCCD"
                     name="cccd"
                     value={formData.cccd}
                     onChange={handleChange}
                     fullWidth
+                    required
                     disabled={saving}
+                    error={!!validationErrors.cccd}
+                    helperText={validationErrors.cccd || "Phải nhập đúng 12 chữ số và không trùng với người khác"}
+                    inputProps={{
+                      pattern: "[0-9]{12}",
+                      maxLength: 12
+                    }}
                   />
                 </Grid>
                 

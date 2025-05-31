@@ -28,6 +28,7 @@ import TemporaryResidenceForm from './components/temporaryResidence/TemporaryRes
 // Thêm import cho các component mới
 const TemporaryResidence = React.lazy(() => import('./components/temporaryResidence/TemporaryResidence'));
 const PersonList = React.lazy(() => import('./components/person/PersonList'));
+const PersonDetail = React.lazy(() => import('./components/person/PersonDetail'));
 
 // Services & Utilities
 import { getToken, clearToken, isAdmin, canAccessHouseholdManagement, canAccessFeeManagement, isToTruong, isKeToan } from './utils/auth';
@@ -365,14 +366,15 @@ const App = () => {
                   <Navigate to="/dashboard" replace />
                 ) : <Navigate to="/login" replace />
               }
-            />
-            <Route
+            />            <Route
               path="/persons/:id"
               element={
                 isAuthenticated ? (
-                  canAccessHouseholdManagement() ? 
-                  <PersonForm /> : 
-                  <Navigate to="/dashboard" replace />
+                  canAccessHouseholdManagement() ? (
+                    <React.Suspense fallback={<div>Đang tải...</div>}>
+                      <PersonDetail />
+                    </React.Suspense>
+                  ) : <Navigate to="/dashboard" replace />
                 ) : <Navigate to="/login" replace />
               }
             />
