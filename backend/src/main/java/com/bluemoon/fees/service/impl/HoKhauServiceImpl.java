@@ -133,7 +133,6 @@ public class HoKhauServiceImpl implements HoKhauService {
         // Update the relationship
         nhanKhau.setQuanHeVoiChuHo(quanHeVoiChuHo);
         hoKhau.addNhanKhau(nhanKhau);
-        
         // Save the change to the household history
         LichSuHoKhau lichSuHoKhau = LichSuHoKhau.builder()
                 .loaiThayDoi(LichSuHoKhau.LoaiThayDoi.THEM_NHAN_KHAU)
@@ -162,8 +161,9 @@ public class HoKhauServiceImpl implements HoKhauService {
             throw new IllegalStateException("Nhân khẩu này không thuộc về hộ khẩu này.");
         }
         
-        // Update the relationship
-        hoKhau.removeNhanKhau(nhanKhau);
+        // Update the relationship - set the household to null for the person
+        nhanKhau.setHoKhau(null);
+        nhanKhauRepository.save(nhanKhau);
         
         // Save the change to the household history
         LichSuHoKhau lichSuHoKhau = LichSuHoKhau.builder()

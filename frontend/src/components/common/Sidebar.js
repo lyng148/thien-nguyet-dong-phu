@@ -20,7 +20,10 @@ import {
   Group as UserManagementIcon,
   Home as HomeIcon,
   AssignmentInd as TemporaryResidenceIcon,
-  Person as PersonIcon
+  Person as PersonIcon,
+  DirectionsCar as VehicleIcon,
+  ElectricBolt as UtilityIcon,
+  AccountBalance as PaymentIcon
 } from '@mui/icons-material';
 import { isAdmin, isToTruong, isKeToan } from '../../utils/auth';
 
@@ -82,14 +85,37 @@ const menuItems = [
     adminOnly: false,
     hideForToTruong: false,
     hideForKeToan: true
-  },
-  {
+  },  {
     text: 'Nhân khẩu',
     icon: <PersonIcon />,
     path: '/persons',
     adminOnly: false,
     hideForToTruong: false,
     hideForKeToan: true
+  },
+  { 
+    text: 'Quản lý xe', 
+    icon: <VehicleIcon />, 
+    path: '/vehicles',
+    adminOnly: false,
+    hideForToTruong: false,
+    hideForKeToan: true
+  },
+  { 
+    text: 'Phí dịch vụ', 
+    icon: <UtilityIcon />, 
+    path: '/utilities',
+    adminOnly: false,
+    hideForToTruong: false,
+    hideForKeToan: false
+  },
+  { 
+    text: 'Đóng phí dịch vụ', 
+    icon: <PaymentIcon />, 
+    path: '/fee-payments',
+    adminOnly: false,
+    hideForToTruong: false,
+    hideForKeToan: false
   },
   { 
     text: 'Thống kê', 

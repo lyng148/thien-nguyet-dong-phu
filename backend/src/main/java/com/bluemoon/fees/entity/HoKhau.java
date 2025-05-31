@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "ho_khau")
-@ToString(exclude = {"cacKhoanNop", "cacNhanKhau"})
+@ToString(exclude = {"cacKhoanNop", "cacNhanKhau", "cacXe"})
 @JsonIdentityInfo(
   generator = ObjectIdGenerators.PropertyGenerator.class, 
   property = "id",
@@ -66,29 +66,49 @@ public class HoKhau {
     @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL)
     @JsonIdentityReference(alwaysAsId = true)
     private List<NopPhi> cacKhoanNop;
-    
-    @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL)
+      @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL)
     private List<NhanKhau> cacNhanKhau = new ArrayList<>();
     
-    @Column(nullable = false)
+    @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Vehicle> cacXe = new ArrayList<>();
+      @Column(nullable = false)
     private boolean hoatDong = true;
+    
+    // Helper methods for managing bidirectional relationships
+    public void addNhanKhau(NhanKhau nhanKhau) {
+        if (cacNhanKhau == null) {
+            cacNhanKhau = new ArrayList<>();
+        }
+        cacNhanKhau.add(nhanKhau);
+        nhanKhau.setHoKhau(this);
+    }
+    
+    public void removeNhanKhau(NhanKhau nhanKhau) {
+        if (cacNhanKhau != null) {
+            cacNhanKhau.remove(nhanKhau);
+            nhanKhau.setHoKhau(null);
+        }
+    }
+    
+    public void addVehicle(Vehicle vehicle) {
+        if (cacXe == null) {
+            cacXe = new ArrayList<>();
+        }
+        cacXe.add(vehicle);
+        vehicle.setHoKhau(this);
+    }
+    
+    public void removeVehicle(Vehicle vehicle) {
+        if (cacXe != null) {
+            cacXe.remove(vehicle);
+            vehicle.setHoKhau(null);
+        }
+    }
     
     @PrePersist
     protected void onCreate() {
         if (ngayLamHoKhau == null) {
             ngayLamHoKhau = LocalDate.now();
         }
-    }
-    
-    public void addNhanKhau(NhanKhau nhanKhau) {
-        cacNhanKhau.add(nhanKhau);
-        nhanKhau.setHoKhau(this);
-        this.soThanhVien = cacNhanKhau.size();
-    }
-    
-    public void removeNhanKhau(NhanKhau nhanKhau) {
-        cacNhanKhau.remove(nhanKhau);
-        nhanKhau.setHoKhau(null);
-        this.soThanhVien = cacNhanKhau.size();
     }
 }

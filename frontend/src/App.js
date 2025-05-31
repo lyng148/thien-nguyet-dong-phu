@@ -29,6 +29,12 @@ import TemporaryResidenceForm from './components/temporaryResidence/TemporaryRes
 const TemporaryResidence = React.lazy(() => import('./components/temporaryResidence/TemporaryResidence'));
 const PersonList = React.lazy(() => import('./components/person/PersonList'));
 const PersonDetail = React.lazy(() => import('./components/person/PersonDetail'));
+const VehicleList = React.lazy(() => import('./components/vehicle/VehicleList'));
+const VehicleForm = React.lazy(() => import('./components/vehicle/VehicleForm'));
+const UtilityService = React.lazy(() => import('./components/utility/UtilityService'));
+const UtilityForm = React.lazy(() => import('./components/utility/UtilityForm'));
+const UtilityDetail = React.lazy(() => import('./components/utility/UtilityDetail'));
+const FeePayment = React.lazy(() => import('./components/feePayment/FeePayment'));
 
 // Services & Utilities
 import { getToken, clearToken, isAdmin, canAccessHouseholdManagement, canAccessFeeManagement, isToTruong, isKeToan } from './utils/auth';
@@ -375,6 +381,95 @@ const App = () => {
                       <PersonDetail />
                     </React.Suspense>
                   ) : <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
+              }            />
+            
+            {/* Vehicle Management - ACCESS: ADMIN or TO_TRUONG */}
+            <Route
+              path="/vehicles"
+              element={
+                isAuthenticated ? (
+                  canAccessHouseholdManagement() ? (
+                    <React.Suspense fallback={<div>Đang tải...</div>}>
+                      <VehicleList />
+                    </React.Suspense>
+                  ) : <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
+              }
+            />
+            <Route
+              path="/vehicles/add"
+              element={
+                isAuthenticated ? (
+                  canAccessHouseholdManagement() ? (
+                    <React.Suspense fallback={<div>Đang tải...</div>}>
+                      <VehicleForm />
+                    </React.Suspense>
+                  ) : <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
+              }
+            />
+            <Route
+              path="/vehicles/edit/:id"
+              element={
+                isAuthenticated ? (
+                  canAccessHouseholdManagement() ? (
+                    <React.Suspense fallback={<div>Đang tải...</div>}>
+                      <VehicleForm />
+                    </React.Suspense>
+                  ) : <Navigate to="/dashboard" replace />
+                ) : <Navigate to="/login" replace />
+              }
+            />
+              {/* Utility Service Management - ACCESS: ALL */}
+            <Route
+              path="/utilities"
+              element={
+                isAuthenticated ? (
+                  <React.Suspense fallback={<div>Đang tải...</div>}>
+                    <UtilityService />
+                  </React.Suspense>
+                ) : <Navigate to="/login" replace />
+              }
+            />
+            <Route
+              path="/utilities/add"
+              element={
+                isAuthenticated ? (
+                  <React.Suspense fallback={<div>Đang tải...</div>}>
+                    <UtilityForm />
+                  </React.Suspense>
+                ) : <Navigate to="/login" replace />
+              }
+            />            <Route
+              path="/utilities/edit/:id"
+              element={
+                isAuthenticated ? (
+                  <React.Suspense fallback={<div>Đang tải...</div>}>
+                    <UtilityForm />
+                  </React.Suspense>
+                ) : <Navigate to="/login" replace />
+              }
+            />
+            <Route
+              path="/utilities/:id"
+              element={
+                isAuthenticated ? (
+                  <React.Suspense fallback={<div>Đang tải...</div>}>
+                    <UtilityDetail />
+                  </React.Suspense>
+                ) : <Navigate to="/login" replace />
+              }
+            />
+            
+            {/* Fee Payment Management - ACCESS: ALL */}
+            <Route
+              path="/fee-payments"
+              element={
+                isAuthenticated ? (
+                  <React.Suspense fallback={<div>Đang tải...</div>}>
+                    <FeePayment />
+                  </React.Suspense>
                 ) : <Navigate to="/login" replace />
               }
             />

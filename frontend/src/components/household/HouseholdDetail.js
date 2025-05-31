@@ -47,7 +47,7 @@ import {
 } from '../../services/householdService';
 import { getAllPeople } from '../../services/personService';
 import { getHistoryByHousehold } from '../../services/householdHistoryService';
-import vehicleService from '../../services/vehicleService';
+import { getVehiclesByHousehold } from '../../services/vehicleService';
 import PageHeader from '../common/PageHeader';
 
 // TabPanel component for displaying tab content
@@ -128,12 +128,10 @@ const HouseholdDetail = () => {
           console.error('Error loading persons list:', personErr);
           // Continue without throwing
           setPersons([]);
-        }
-
-        // Try to fetch vehicles for this household
+        }        // Try to fetch vehicles for this household
         try {
-          const vehicleData = await vehicleService.getVehiclesByHousehold(id);
-          setVehicles(Array.isArray(vehicleData.data) ? vehicleData.data : []);
+          const vehicleData = await getVehiclesByHousehold(id);
+          setVehicles(Array.isArray(vehicleData) ? vehicleData : []);
         } catch (vehicleErr) {
           console.error('Error loading household vehicles:', vehicleErr);
           setVehicles([]);
