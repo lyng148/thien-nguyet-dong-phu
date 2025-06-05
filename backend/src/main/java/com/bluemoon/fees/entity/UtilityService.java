@@ -17,12 +17,8 @@ public class UtilityService {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(name = "ho_khau_id", nullable = false)
-    private Long hoKhauId;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ho_khau_id", insertable = false, updatable = false)
+      @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ho_khau_id")
     @JsonBackReference
     private HoKhau hoKhau;
     

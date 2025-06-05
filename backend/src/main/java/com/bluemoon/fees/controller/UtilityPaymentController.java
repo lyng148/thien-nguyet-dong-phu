@@ -22,35 +22,35 @@ public class UtilityPaymentController {
     private final UtilityPaymentService utilityPaymentService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('TO_TRUONG', 'KE_TOAN')")
+    @PreAuthorize("hasAnyRole('ADMIN','TO_TRUONG', 'KE_TOAN')")
     public ResponseEntity<List<UtilityPaymentDTO>> getAllUtilityPayments() {
         List<UtilityPaymentDTO> payments = utilityPaymentService.getAllUtilityPayments();
         return ResponseEntity.ok(payments);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TO_TRUONG', 'KE_TOAN')")
+    @PreAuthorize("hasAnyRole('ADMIN','TO_TRUONG', 'KE_TOAN')")
     public ResponseEntity<UtilityPaymentDTO> getUtilityPaymentById(@PathVariable Long id) {
         UtilityPaymentDTO payment = utilityPaymentService.getUtilityPaymentById(id);
         return ResponseEntity.ok(payment);
     }
 
     @GetMapping("/household/{hoKhauId}")
-    @PreAuthorize("hasAnyRole('TO_TRUONG', 'KE_TOAN')")
+    @PreAuthorize("hasAnyRole('ADMIN','TO_TRUONG', 'KE_TOAN')")
     public ResponseEntity<List<UtilityPaymentDTO>> getUtilityPaymentsByHousehold(@PathVariable Long hoKhauId) {
         List<UtilityPaymentDTO> payments = utilityPaymentService.getUtilityPaymentsByHoKhauId(hoKhauId);
         return ResponseEntity.ok(payments);
     }
 
     @GetMapping("/utility-service/{utilityServiceId}")
-    @PreAuthorize("hasAnyRole('TO_TRUONG', 'KE_TOAN')")
+    @PreAuthorize("hasAnyRole('ADMIN','TO_TRUONG', 'KE_TOAN')")
     public ResponseEntity<List<UtilityPaymentDTO>> getUtilityPaymentsByUtilityService(@PathVariable Long utilityServiceId) {
         List<UtilityPaymentDTO> payments = utilityPaymentService.getUtilityPaymentsByUtilityServiceId(utilityServiceId);
         return ResponseEntity.ok(payments);
     }
 
     @GetMapping("/date-range")
-    @PreAuthorize("hasAnyRole('TO_TRUONG', 'KE_TOAN')")
+    @PreAuthorize("hasAnyRole('ADMIN','TO_TRUONG', 'KE_TOAN')")
     public ResponseEntity<List<UtilityPaymentDTO>> getUtilityPaymentsByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -59,7 +59,7 @@ public class UtilityPaymentController {
     }
 
     @GetMapping("/household/{hoKhauId}/month/{thang}/year/{nam}")
-    @PreAuthorize("hasAnyRole('TO_TRUONG', 'KE_TOAN')")
+    @PreAuthorize("hasAnyRole('ADMIN','TO_TRUONG', 'KE_TOAN')")
     public ResponseEntity<List<UtilityPaymentDTO>> getUtilityPaymentsByHouseholdAndMonth(
             @PathVariable Long hoKhauId,
             @PathVariable Integer thang,
@@ -81,7 +81,7 @@ public class UtilityPaymentController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('TO_TRUONG')")
+    @PreAuthorize("hasAnyRole('ADMIN','TO_TRUONG', 'KE_TOAN')")
     public ResponseEntity<Void> deleteUtilityPayment(@PathVariable Long id) {
         utilityPaymentService.deleteUtilityPayment(id);
         return ResponseEntity.noContent().build();
@@ -95,14 +95,14 @@ public class UtilityPaymentController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('TO_TRUONG', 'KE_TOAN')")
+    @PreAuthorize("hasAnyRole('ADMIN','TO_TRUONG', 'KE_TOAN')")
     public ResponseEntity<List<UtilityPaymentDTO>> searchUtilityPayments(@RequestParam String search) {
         List<UtilityPaymentDTO> payments = utilityPaymentService.searchUtilityPayments(search);
         return ResponseEntity.ok(payments);
     }
 
     @GetMapping("/household/{hoKhauId}/total/{thang}/{nam}")
-    @PreAuthorize("hasAnyRole('TO_TRUONG', 'KE_TOAN')")
+    @PreAuthorize("hasAnyRole('ADMIN','TO_TRUONG', 'KE_TOAN')")
     public ResponseEntity<Double> calculateTotalPaid(
             @PathVariable Long hoKhauId,
             @PathVariable Integer thang,
@@ -112,7 +112,7 @@ public class UtilityPaymentController {
     }
 
     @GetMapping("/transaction-code/{code}")
-    @PreAuthorize("hasAnyRole('TO_TRUONG', 'KE_TOAN')")
+    @PreAuthorize("hasAnyRole('ADMIN','TO_TRUONG', 'KE_TOAN')")
     public ResponseEntity<UtilityPaymentDTO> getUtilityPaymentByTransactionCode(@PathVariable String code) {
         UtilityPaymentDTO payment = utilityPaymentService.findByTransactionCode(code);
         return ResponseEntity.ok(payment);

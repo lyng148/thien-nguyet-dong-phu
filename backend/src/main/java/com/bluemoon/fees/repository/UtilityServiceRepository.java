@@ -11,12 +11,11 @@ import java.util.Optional;
 
 @Repository
 public interface UtilityServiceRepository extends JpaRepository<UtilityService, Long> {
-    
-    // Find utility services by household ID
-    List<UtilityService> findByHoKhauId(Long hoKhauId);
+      // Find utility services by household ID
+    List<UtilityService> findByHoKhau_Id(Long hoKhauId);
     
     // Find utility services by household and month/year
-    List<UtilityService> findByHoKhauIdAndThangAndNam(Long hoKhauId, Integer thang, Integer nam);
+    List<UtilityService> findByHoKhau_IdAndThangAndNam(Long hoKhauId, Integer thang, Integer nam);
     
     // Find utility services by service type
     List<UtilityService> findByLoaiDichVu(String loaiDichVu);
@@ -26,9 +25,8 @@ public interface UtilityServiceRepository extends JpaRepository<UtilityService, 
     
     // Find utility services by payment status
     List<UtilityService> findByTrangThai(String trangThai);
-    
-    // Check if utility service exists for household, service type, month, year
-    @Query("SELECT COUNT(u) > 0 FROM UtilityService u WHERE u.hoKhauId = :hoKhauId AND u.loaiDichVu = :loaiDichVu AND u.thang = :thang AND u.nam = :nam AND (:utilityId IS NULL OR u.id != :utilityId)")
+      // Check if utility service exists for household, service type, month, year
+    @Query("SELECT COUNT(u) > 0 FROM UtilityService u WHERE u.hoKhau.id = :hoKhauId AND u.loaiDichVu = :loaiDichVu AND u.thang = :thang AND u.nam = :nam AND (:utilityId IS NULL OR u.id != :utilityId)")
     boolean existsByHoKhauIdAndLoaiDichVuAndThangAndNamAndIdNot(
         @Param("hoKhauId") Long hoKhauId, 
         @Param("loaiDichVu") String loaiDichVu, 
@@ -52,12 +50,11 @@ public interface UtilityServiceRepository extends JpaRepository<UtilityService, 
            "LOWER(h.chuHo) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(u.loaiDichVu) LIKE LOWER(CONCAT('%', :search, '%')))")
     List<UtilityService> searchUtilityServices(@Param("search") String search);
-    
-    // Calculate total amount for household by month/year
-    @Query("SELECT COALESCE(SUM(u.tongTien), 0) FROM UtilityService u WHERE u.hoKhauId = :hoKhauId AND u.thang = :thang AND u.nam = :nam")
+      // Calculate total amount for household by month/year
+    @Query("SELECT COALESCE(SUM(u.tongTien), 0) FROM UtilityService u WHERE u.hoKhau.id = :hoKhauId AND u.thang = :thang AND u.nam = :nam")
     Double calculateTotalUtilityFeeByHouseholdAndMonth(@Param("hoKhauId") Long hoKhauId, @Param("thang") Integer thang, @Param("nam") Integer nam);
     
     // Find unpaid utility services for household
-    @Query("SELECT u FROM UtilityService u WHERE u.hoKhauId = :hoKhauId AND u.trangThai = 'CHUA_THANH_TOAN'")
+    @Query("SELECT u FROM UtilityService u WHERE u.hoKhau.id = :hoKhauId AND u.trangThai = 'CHUA_THANH_TOAN'")
     List<UtilityService> findUnpaidUtilityServicesByHousehold(@Param("hoKhauId") Long hoKhauId);
 }

@@ -85,10 +85,17 @@ export const getUtilityBillsByHousehold = async (householdId, month = null, year
     }
     
     const response = await api.get(url);
+    
+    // Kiểm tra nếu không có dữ liệu, trả về mảng rỗng
+    if (!response.data || response.data.length === 0) {
+      return [];
+    }
+    
     return response.data.map(item => mapToFrontendFormat(item));
   } catch (error) {
     console.error(`Error fetching utility bills for household ${householdId}:`, error);
-    throw error;
+    // Trong trường hợp lỗi, trả về mảng rỗng thay vì ném ngoại lệ
+    return [];
   }
 };
 

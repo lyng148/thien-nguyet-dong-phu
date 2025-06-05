@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "ho_khau")
-@ToString(exclude = {"cacKhoanNop", "cacNhanKhau", "cacXe"})
+@ToString(exclude = {"cacKhoanNop", "cacNhanKhau", "cacXe", "cacDichVu", "cacThanhToanDichVu", "lichSuHoKhau"})
 @JsonIdentityInfo(
   generator = ObjectIdGenerators.PropertyGenerator.class, 
   property = "id",
@@ -73,6 +73,17 @@ public class HoKhau {
     @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIdentityReference(alwaysAsId = true)
     private List<Vehicle> cacXe = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIdentityReference(alwaysAsId = true)
+    private List<UtilityService> cacDichVu = new ArrayList<>();
+      @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIdentityReference(alwaysAsId = true)
+    private List<UtilityPayment> cacThanhToanDichVu = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIdentityReference(alwaysAsId = true)
+    private List<LichSuHoKhau> lichSuHoKhau = new ArrayList<>();
       @Column(nullable = false)
     private boolean hoatDong = true;
     
@@ -99,11 +110,25 @@ public class HoKhau {
         cacXe.add(vehicle);
         vehicle.setHoKhau(this);
     }
-    
-    public void removeVehicle(Vehicle vehicle) {
+      public void removeVehicle(Vehicle vehicle) {
         if (cacXe != null) {
             cacXe.remove(vehicle);
             vehicle.setHoKhau(null);
+        }
+    }
+    
+    public void addLichSuHoKhau(LichSuHoKhau lichSu) {
+        if (lichSuHoKhau == null) {
+            lichSuHoKhau = new ArrayList<>();
+        }
+        lichSuHoKhau.add(lichSu);
+        lichSu.setHoKhau(this);
+    }
+    
+    public void removeLichSuHoKhau(LichSuHoKhau lichSu) {
+        if (lichSuHoKhau != null) {
+            lichSuHoKhau.remove(lichSu);
+            lichSu.setHoKhau(null);
         }
     }
     

@@ -75,41 +75,48 @@ public class UtilityPaymentServiceImpl implements UtilityPaymentService {
         UtilityPayment payment = utilityPaymentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thanh toán với ID: " + id));
         return convertToDTO(payment);
-    }
-
-    @Override
+    }    @Override
     public UtilityPaymentDTO createUtilityPayment(UtilityPaymentRequest request) {
         // Validate household exists
         HoKhau hoKhau = hoKhauRepository.findById(request.getHoKhauId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hộ khẩu với ID: " + request.getHoKhauId()));
 
-        // Validate utility service exists and get month/year info
-        UtilityService utilityService = utilityServiceRepository.findById(request.getUtilityServiceId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy dịch vụ tiện ích với ID: " + request.getUtilityServiceId()));
-        
-        Integer thang = utilityService.getThang();
-        Integer nam = utilityService.getNam();
+        // Lấy thông tin tháng và năm trực tiếp từ request
+        Integer thang = request.getThang();
+        Integer nam = request.getNam();
         
         // Check if payment already exists for this month
         List<UtilityPayment> existingPayments = utilityPaymentRepository
-                .findByHoKhauIdAndThangAndNam(request.getHoKhauId(), thang, nam)
-                .stream()
-                .filter(payment -> payment.getUtilityServiceId().equals(request.getUtilityServiceId()))
-                .toList();
+                .findByHoKhauIdAndThangAndNam(request.getHoKhauId(), thang, nam);
         
         if (!existingPayments.isEmpty()) {
-            throw new RuntimeException("Đã có thanh toán cho dịch vụ này trong tháng " + 
+            throw new RuntimeException("Đã có thanh toán cho hộ này trong tháng " + 
                     thang + "/" + nam);
         }
 
         UtilityPayment payment = new UtilityPayment();
         payment.setHoKhau(hoKhau);
-        payment.setUtilityService(utilityService);
         payment.setHoKhauId(request.getHoKhauId());
-        payment.setUtilityServiceId(request.getUtilityServiceId());
+          // UtilityServiceId không còn bắt buộc trong entity nhưng vẫn bắt buộc trong DB
+        if (request.getUtilityServiceId() != null) {
+            try {
+                UtilityService utilityService = utilityServiceRepository.findById(request.getUtilityServiceId())
+                    .orElse(null);
+                payment.setUtilityService(utilityService);
+                payment.setUtilityServiceId(request.getUtilityServiceId());
+            } catch (Exception e) {
+                // Bỏ qua nếu không tìm thấy utilityService
+            }
+        } else {
+            // Nếu không có utilityServiceId, sử dụng giá trị mặc định là 1 để tránh null
+            payment.setUtilityServiceId(1L);
+        }
+        
         payment.setThang(thang);
         payment.setNam(nam);
         payment.setSoTienThanhToan(request.getSoTienThanhToan());
+        payment.setPhiGuiXe(request.getPhiGuiXe());
+        payment.setPhiDichVu(request.getPhiDichVu());
         payment.setNgayThanhToan(request.getNgayThanhToan() != null ? request.getNgayThanhToan() : LocalDate.now());
         payment.setPhuongThucThanhToan(request.getPhuongThucThanhToan());
         payment.setMaGiaoDich(generateTransactionCode());
@@ -119,9 +126,7 @@ public class UtilityPaymentServiceImpl implements UtilityPaymentService {
 
         UtilityPayment savedPayment = utilityPaymentRepository.save(payment);
         return convertToDTO(savedPayment);
-    }
-
-    @Override
+    }    @Override
     public UtilityPaymentDTO updateUtilityPayment(Long id, UtilityPaymentRequest request) {
         UtilityPayment payment = utilityPaymentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thanh toán với ID: " + id));
@@ -130,17 +135,29 @@ public class UtilityPaymentServiceImpl implements UtilityPaymentService {
         HoKhau hoKhau = hoKhauRepository.findById(request.getHoKhauId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hộ khẩu với ID: " + request.getHoKhauId()));
 
-        // Validate utility service exists
-        UtilityService utilityService = utilityServiceRepository.findById(request.getUtilityServiceId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy dịch vụ tiện ích với ID: " + request.getUtilityServiceId()));
-
         payment.setHoKhau(hoKhau);
-        payment.setUtilityService(utilityService);
         payment.setHoKhauId(request.getHoKhauId());
-        payment.setUtilityServiceId(request.getUtilityServiceId());
-        payment.setThang(utilityService.getThang());
-        payment.setNam(utilityService.getNam());
+        
+        // UtilityServiceId không còn bắt buộc, nhưng nếu có thì vẫn lưu
+        if (request.getUtilityServiceId() != null) {
+            try {
+                UtilityService utilityService = utilityServiceRepository.findById(request.getUtilityServiceId())
+                    .orElse(null);
+                if (utilityService != null) {
+                    payment.setUtilityService(utilityService);
+                    payment.setUtilityServiceId(request.getUtilityServiceId());
+                }
+            } catch (Exception e) {
+                // Bỏ qua nếu không tìm thấy utilityService
+            }
+        }
+        
+        // Sử dụng thang và nam từ request
+        payment.setThang(request.getThang());
+        payment.setNam(request.getNam());
         payment.setSoTienThanhToan(request.getSoTienThanhToan());
+        payment.setPhiGuiXe(request.getPhiGuiXe());
+        payment.setPhiDichVu(request.getPhiDichVu());
         payment.setNgayThanhToan(request.getNgayThanhToan() != null ? request.getNgayThanhToan() : LocalDate.now());
         payment.setPhuongThucThanhToan(request.getPhuongThucThanhToan());
         payment.setGhiChu(request.getGhiChu());
@@ -197,19 +214,27 @@ public class UtilityPaymentServiceImpl implements UtilityPaymentService {
         String datePrefix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String randomSuffix = String.format("%04d", new Random().nextInt(10000));
         return "UT" + datePrefix + randomSuffix;
-    }
-
-    private UtilityPaymentDTO convertToDTO(UtilityPayment payment) {
+    }    private UtilityPaymentDTO convertToDTO(UtilityPayment payment) {
         UtilityPaymentDTO dto = new UtilityPaymentDTO();
         dto.setId(payment.getId());
         dto.setHoKhauId(payment.getHoKhau().getId());
         dto.setSoHoKhau(payment.getHoKhau().getSoHoKhau());
         dto.setChuHo(payment.getHoKhau().getChuHo());
-        dto.setUtilityServiceId(payment.getUtilityService().getId());
-        dto.setLoaiDichVu(payment.getUtilityService().getLoaiDichVu());
+        
+        // UtilityService có thể null, xử lý an toàn
+        if (payment.getUtilityService() != null) {
+            dto.setUtilityServiceId(payment.getUtilityService().getId());
+            dto.setLoaiDichVu(payment.getUtilityService().getLoaiDichVu());
+        } else {
+            dto.setUtilityServiceId(payment.getUtilityServiceId());
+            dto.setLoaiDichVu("Không xác định");
+        }
+        
         dto.setThang(payment.getThang());
         dto.setNam(payment.getNam());
         dto.setSoTienThanhToan(payment.getSoTienThanhToan());
+        dto.setPhiGuiXe(payment.getPhiGuiXe() != null ? payment.getPhiGuiXe() : 0.0);
+        dto.setPhiDichVu(payment.getPhiDichVu() != null ? payment.getPhiDichVu() : 0.0);
         dto.setNgayThanhToan(payment.getNgayThanhToan());
         dto.setPhuongThucThanhToan(payment.getPhuongThucThanhToan());
         dto.setMaGiaoDich(payment.getMaGiaoDich());

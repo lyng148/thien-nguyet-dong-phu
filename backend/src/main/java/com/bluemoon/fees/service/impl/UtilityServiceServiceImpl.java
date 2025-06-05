@@ -29,11 +29,10 @@ public class UtilityServiceServiceImpl implements UtilityServiceService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-    
-    @Override
+      @Override
     @Transactional(readOnly = true)
     public List<UtilityServiceDTO> getUtilityServicesByHoKhauId(Long hoKhauId) {
-        return utilityServiceRepository.findByHoKhauId(hoKhauId).stream()
+        return utilityServiceRepository.findByHoKhau_Id(hoKhauId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -45,11 +44,10 @@ public class UtilityServiceServiceImpl implements UtilityServiceService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-    
-    @Override
+      @Override
     @Transactional(readOnly = true)
     public List<UtilityServiceDTO> getUtilityServicesByHouseholdAndMonth(Long hoKhauId, Integer thang, Integer nam) {
-        return utilityServiceRepository.findByHoKhauIdAndThangAndNam(hoKhauId, thang, nam).stream()
+        return utilityServiceRepository.findByHoKhau_IdAndThangAndNam(hoKhauId, thang, nam).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -81,9 +79,8 @@ public class UtilityServiceServiceImpl implements UtilityServiceService {
             request.getChiSoMoi() <= request.getChiSoCu()) {
             throw new RuntimeException("Chỉ số mới phải lớn hơn chỉ số cũ");
         }
-        
-        UtilityService utilityService = new UtilityService();
-        utilityService.setHoKhauId(request.getHoKhauId());
+          UtilityService utilityService = new UtilityService();
+        utilityService.setHoKhau(hoKhau);
         utilityService.setLoaiDichVu(request.getLoaiDichVu());
         utilityService.setThang(request.getThang());
         utilityService.setNam(request.getNam());
@@ -155,9 +152,8 @@ public class UtilityServiceServiceImpl implements UtilityServiceService {
             ("NUOC".equals(request.getLoaiDichVu()) || "DIEN".equals(request.getLoaiDichVu())) &&
             request.getChiSoMoi() <= request.getChiSoCu()) {
             throw new RuntimeException("Chỉ số mới phải lớn hơn chỉ số cũ");
-        }
-          
-        existingUtilityService.setHoKhauId(request.getHoKhauId());
+        }        
+        existingUtilityService.setHoKhau(hoKhau);
         existingUtilityService.setLoaiDichVu(request.getLoaiDichVu());
         existingUtilityService.setThang(request.getThang());
         existingUtilityService.setNam(request.getNam());
@@ -268,11 +264,10 @@ public class UtilityServiceServiceImpl implements UtilityServiceService {
         utilityService.setTrangThai("CHUA_THANH_TOAN");
         utilityServiceRepository.save(utilityService);
     }
-    
-    private UtilityServiceDTO convertToDTO(UtilityService utilityService) {
+      private UtilityServiceDTO convertToDTO(UtilityService utilityService) {
         UtilityServiceDTO dto = new UtilityServiceDTO();
         dto.setId(utilityService.getId());
-        dto.setHoKhauId(utilityService.getHoKhauId());
+        dto.setHoKhauId(utilityService.getHoKhau() != null ? utilityService.getHoKhau().getId() : null);
         dto.setLoaiDichVu(utilityService.getLoaiDichVu());
         dto.setThang(utilityService.getThang());
         dto.setNam(utilityService.getNam());

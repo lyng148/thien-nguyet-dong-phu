@@ -13,12 +13,13 @@ public class UtilityPaymentDTO {
     private Long id;
     private Long hoKhauId;
     private String soHoKhau;
-    private String chuHo;
-    private Long utilityServiceId;
+    private String chuHo;    private Long utilityServiceId;
     private String loaiDichVu;
     private Integer thang;
     private Integer nam;
     private Double soTienThanhToan;
+    private Double phiGuiXe;
+    private Double phiDichVu;
     private LocalDate ngayThanhToan;
     private String phuongThucThanhToan;
     private String maGiaoDich;

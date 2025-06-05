@@ -12,16 +12,23 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UtilityPaymentRequest {
-    
-    @NotNull(message = "ID hộ khẩu không được để trống")
+      @NotNull(message = "ID hộ khẩu không được để trống")
     private Long hoKhauId;
     
-    @NotNull(message = "ID dịch vụ không được để trống")
-    private Long utilityServiceId;
+    private Long utilityServiceId; // Không bắt buộc nữa
     
     @NotNull(message = "Số tiền thanh toán không được để trống")
     @Min(value = 0, message = "Số tiền thanh toán phải lớn hơn 0")
     private Double soTienThanhToan;
+    
+    private Double phiGuiXe = 0.0;
+    private Double phiDichVu = 0.0;
+    
+    @NotNull(message = "Tháng không được để trống")
+    private Integer thang;
+    
+    @NotNull(message = "Năm không được để trống")
+    private Integer nam;
     
     private LocalDate ngayThanhToan;
     

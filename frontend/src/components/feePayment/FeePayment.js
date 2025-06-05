@@ -31,7 +31,8 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Divider
+  Divider,
+  Badge
 } from '@mui/material';
 import {
   Payment as PaymentIcon,
@@ -50,9 +51,23 @@ import {
   createPayment,
   PAYMENT_METHODS,
   PAYMENT_STATUS,
-  formatCurrency
+  formatCurrency,
+  debugPaymentCheck // Thêm import này để debug
 } from '../../services/feePaymentService';
 import { getAllHouseholds } from '../../services/householdService';
+
+// Debug function to test payment status
+const debugPaymentStatus = async (householdId, month, year) => {
+  try {
+    console.log(`🔍 Debug: Checking payment status for household ${householdId}, month ${month}, year ${year}`);
+    const isPaid = await checkPaymentExists(householdId, month, year);
+    console.log(`🔍 Debug: Result for household ${householdId}: ${isPaid ? 'PAID' : 'UNPAID'}`);
+    return isPaid;
+  } catch (error) {
+    console.error('🔍 Debug: Error checking payment status:', error);
+    return false;
+  }
+};
 
 const FeePayment = () => {
   const navigate = useNavigate();
@@ -63,6 +78,7 @@ const FeePayment = () => {
   const [filterHousehold, setFilterHousehold] = useState('ALL');
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
+  const [filterStatus, setFilterStatus] = useState('ALL'); // 'ALL', 'PAID', 'UNPAID'
   
   // Payment dialog states
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
@@ -76,10 +92,9 @@ const FeePayment = () => {
   useEffect(() => {
     loadData();
   }, [filterMonth, filterYear]);
-
   useEffect(() => {
     filterFees();
-  }, [householdFees, filterHousehold]);
+  }, [householdFees, filterHousehold, filterStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -115,14 +130,22 @@ const FeePayment = () => {
       filtered = filtered.filter(fee => fee.householdId === parseInt(filterHousehold));
     }
 
+    if (filterStatus === 'PAID') {
+      filtered = filtered.filter(fee => fee.isPaid);
+    } else if (filterStatus === 'UNPAID') {
+      filtered = filtered.filter(fee => !fee.isPaid);
+    }
+
     setFilteredFees(filtered);
   };
 
   const handleRefresh = () => {
     loadData();
   };
-
   const handlePaymentDialogOpen = (householdFee) => {
+    // Nếu đã thanh toán rồi thì không cho mở dialog
+    if (householdFee.isPaid) return;
+    
     setSelectedHousehold(householdFee);
     setPaymentDialogOpen(true);
     setError('');
@@ -137,37 +160,58 @@ const FeePayment = () => {
     setError('');
     setSuccess('');
   };
-
   const handleProcessPayment = async () => {
     if (!selectedHousehold) return;
 
     setSaving(true);
-    setError('');
-
-    try {
-      const paymentData = {
+    setError('');    try {
+      // Đảm bảo tính tổng chính xác từ phiGuiXe và phiDichVu
+      const parkingFee = selectedHousehold.parkingFee || 0;
+      const utilityFee = selectedHousehold.utilityFee || 0;
+      const totalAmount = parkingFee + utilityFee;
+        const paymentData = {
         hoKhauId: selectedHousehold.householdId,
         thang: filterMonth,
         nam: filterYear,
-        phiGuiXe: selectedHousehold.parkingFee,
-        phiDichVu: selectedHousehold.utilityFee,
-        tongTien: selectedHousehold.totalAmount,
-        trangThaiThanhToan: 'DA_THANH_TOAN',
+        phiGuiXe: parkingFee,
+        phiDichVu: utilityFee,
+        soTienThanhToan: totalAmount,
         ngayThanhToan: new Date().toISOString().split('T')[0],
         phuongThucThanhToan: paymentMethod,
-        ghiChu: paymentNotes || `Thanh toán phí tháng ${filterMonth}/${filterYear}`
-      };
-
-      await createPayment(paymentData);
+        trangThai: 'DA_THANH_TOAN',
+        ghiChu: paymentNotes || `Thanh toán phí tháng ${filterMonth}/${filterYear}`      };      
+      
+      console.log('Processing payment with data:', paymentData);
+      
+      const result = await createPayment(paymentData);
+      console.log('Payment created successfully:', result);
+      
       setSuccess('Thanh toán thành công!');
       
-      setTimeout(() => {
-        handlePaymentDialogClose();
-        loadData(); // Refresh data
-      }, 1500);
-    } catch (error) {
+      // Refresh data immediately to show updated status
+      setTimeout(async () => {
+        await loadData(); // Refresh data
+        setSuccess('Thanh toán thành công! Dữ liệu đã được cập nhật.');
+        
+        // Close dialog after 2 more seconds
+        setTimeout(() => {
+          handlePaymentDialogClose();
+        }, 2000);
+      }, 500);} catch (error) {
       console.error('Error processing payment:', error);
-      setError('Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.');
+      
+      // Hiển thị thông báo lỗi chi tiết từ backend nếu có
+      if (error.response && error.response.data) {
+        if (typeof error.response.data === 'string') {
+          setError(error.response.data);
+        } else if (error.response.data.message) {
+          setError(error.response.data.message);
+        } else {
+          setError('Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.');
+        }
+      } else {
+        setError('Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.');
+      }
     }
     setSaving(false);
   };
@@ -210,8 +254,7 @@ const FeePayment = () => {
 
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={3}>
+          <Grid container spacing={2} alignItems="center">            <Grid item xs={12} sm={2}>
               <FormControl fullWidth>
                 <InputLabel>Tháng</InputLabel>
                 <Select
@@ -228,7 +271,7 @@ const FeePayment = () => {
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12} sm={2}>
               <FormControl fullWidth>
                 <InputLabel>Năm</InputLabel>
                 <Select
@@ -241,6 +284,21 @@ const FeePayment = () => {
                       {year.label}
                     </MenuItem>
                   ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={3}>
+              <FormControl fullWidth>
+                <InputLabel>Trạng thái</InputLabel>
+                <Select
+                  value={filterStatus}
+                  label="Trạng thái"
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                >
+                  <MenuItem value="ALL">Tất cả</MenuItem>
+                  <MenuItem value="PAID">Đã thanh toán</MenuItem>
+                  <MenuItem value="UNPAID">Chưa thanh toán</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -263,7 +321,7 @@ const FeePayment = () => {
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} sm={2}>
+            <Grid item xs={12} sm={1}>
               <Tooltip title="Làm mới">
                 <IconButton 
                   onClick={handleRefresh} 
@@ -275,15 +333,33 @@ const FeePayment = () => {
                 </IconButton>
               </Tooltip>
             </Grid>
-          </Grid>
-
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6" color="primary">
-              Tổng phí cần thu: {formatCurrency(totalAmount)}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Tháng {filterMonth}/{filterYear} - {filteredFees.length} hộ gia đình
-            </Typography>
+          </Grid>          <Box sx={{ mt: 2 }}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} md={6}>
+                <Typography variant="h6" color="primary">
+                  Tổng phí cần thu: {formatCurrency(totalAmount)}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Tháng {filterMonth}/{filterYear} - {filteredFees.length} hộ gia đình
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">Đã thanh toán:</Typography>
+                    <Typography variant="body1" color="success.main" fontWeight="bold">
+                      {formatCurrency(filteredFees.filter(fee => fee.isPaid).reduce((sum, fee) => sum + fee.totalAmount, 0))}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">Chưa thanh toán:</Typography>
+                    <Typography variant="body1" color="warning.main" fontWeight="bold">
+                      {formatCurrency(filteredFees.filter(fee => !fee.isPaid).reduce((sum, fee) => sum + fee.totalAmount, 0))}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
           </Box>
         </CardContent>
       </Card>
@@ -303,13 +379,13 @@ const FeePayment = () => {
                 </Box>
               ) : (
                 <TableContainer component={Paper} elevation={0}>
-                  <Table>
-                    <TableHead>
+                  <Table>                    <TableHead>
                       <TableRow>
                         <TableCell>Hộ gia đình</TableCell>
                         <TableCell>Phí gửi xe</TableCell>
                         <TableCell>Phí dịch vụ</TableCell>
                         <TableCell>Tổng tiền</TableCell>
+                        <TableCell>Trạng thái</TableCell>
                         <TableCell>Chi tiết</TableCell>
                         <TableCell align="right">Thao tác</TableCell>
                       </TableRow>
@@ -335,11 +411,20 @@ const FeePayment = () => {
                           </TableCell>
                           <TableCell>
                             {formatCurrency(fee.utilityFee)}
-                          </TableCell>
-                          <TableCell>
+                          </TableCell>                          <TableCell>
                             <Box sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                               {formatCurrency(fee.totalAmount)}
                             </Box>
+                          </TableCell>                          <TableCell>
+                            <Tooltip title={fee.isPaid ? 
+                              "Phí này đã được thanh toán" : 
+                              "Phí này chưa được thanh toán, nhấn nút Thanh toán để xử lý"}>
+                              <Chip 
+                                label={fee.isPaid ? PAYMENT_STATUS.DA_THANH_TOAN : PAYMENT_STATUS.CHUA_THANH_TOAN}
+                                color={fee.isPaid ? "success" : "warning"}
+                                size="small"
+                              />
+                            </Tooltip>
                           </TableCell>
                           <TableCell>
                             <Accordion>
@@ -373,14 +458,24 @@ const FeePayment = () => {
                             </Accordion>
                           </TableCell>
                           <TableCell align="right">
-                            <Button
-                              variant="contained"
-                              startIcon={<PaymentIcon />}
-                              onClick={() => handlePaymentDialogOpen(fee)}
-                              size="small"
-                            >
-                              Thanh toán
-                            </Button>
+                            {fee.isPaid ? (
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                disabled
+                              >
+                                Đã thanh toán
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="contained"
+                                startIcon={<PaymentIcon />}
+                                onClick={() => handlePaymentDialogOpen(fee)}
+                                size="small"
+                              >
+                                Thanh toán
+                              </Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
