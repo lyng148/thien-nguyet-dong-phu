@@ -67,8 +67,7 @@ public class UtilityServiceServiceImpl implements UtilityServiceService {
         // Validate household exists
         HoKhau hoKhau = hoKhauRepository.findById(request.getHoKhauId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hộ khẩu với ID: " + request.getHoKhauId()));
-        
-        // Check if utility service already exists for this household, service type, month, year
+          // Check if utility service already exists for this household, service type, month, year
         if (checkUtilityServiceExists(request.getHoKhauId(), request.getLoaiDichVu(), 
                                     request.getThang(), request.getNam(), null)) {
             throw new RuntimeException("Dịch vụ " + request.getLoaiDichVu() + 
@@ -76,8 +75,9 @@ public class UtilityServiceServiceImpl implements UtilityServiceService {
                                      " đã tồn tại cho hộ khẩu này");
         }
         
-        // Validate that new reading is greater than old reading for metered services
+        // Validate that new reading is greater than old reading only for water and electricity services
         if (request.getChiSoCu() != null && request.getChiSoMoi() != null && 
+            ("NUOC".equals(request.getLoaiDichVu()) || "DIEN".equals(request.getLoaiDichVu())) &&
             request.getChiSoMoi() <= request.getChiSoCu()) {
             throw new RuntimeException("Chỉ số mới phải lớn hơn chỉ số cũ");
         }
@@ -142,8 +142,7 @@ public class UtilityServiceServiceImpl implements UtilityServiceService {
         // Validate household exists
         HoKhau hoKhau = hoKhauRepository.findById(request.getHoKhauId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hộ khẩu với ID: " + request.getHoKhauId()));
-        
-        // Check if utility service already exists (excluding current record)
+          // Check if utility service already exists (excluding current record)
         if (checkUtilityServiceExists(request.getHoKhauId(), request.getLoaiDichVu(), 
                                     request.getThang(), request.getNam(), id)) {
             throw new RuntimeException("Dịch vụ " + request.getLoaiDichVu() + 
@@ -151,8 +150,9 @@ public class UtilityServiceServiceImpl implements UtilityServiceService {
                                      " đã tồn tại cho hộ khẩu này");
         }
         
-        // Validate that new reading is greater than old reading for metered services
+        // Validate that new reading is greater than old reading only for water and electricity services
         if (request.getChiSoCu() != null && request.getChiSoMoi() != null && 
+            ("NUOC".equals(request.getLoaiDichVu()) || "DIEN".equals(request.getLoaiDichVu())) &&
             request.getChiSoMoi() <= request.getChiSoCu()) {
             throw new RuntimeException("Chỉ số mới phải lớn hơn chỉ số cũ");
         }

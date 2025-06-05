@@ -37,7 +37,6 @@ import {
   Search as SearchIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Visibility as VisibilityIcon,
   Refresh as RefreshIcon,
   ElectricBolt as ElectricIcon,
   Water as WaterIcon,
@@ -83,15 +82,16 @@ const UtilityService = () => {
   useEffect(() => {
     filterBills();
   }, [utilityBills, filterHousehold, filterService, filterMonth, filterYear]);
-
   const loadData = async () => {
     setLoading(true);
     try {
       const householdsData = await getAllHouseholds();
+      console.log('Loaded households data:', householdsData);
       setHouseholds(householdsData);
       
       // Lấy dữ liệu từ API thay vì tạo dữ liệu mẫu
       const utilityBillsData = await getUtilityBillsByMonthYear(filterMonth, filterYear);
+      console.log('Loaded utility bills data:', utilityBillsData);
       setUtilityBills(utilityBillsData);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -172,10 +172,12 @@ const UtilityService = () => {
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
   };
-
   const getHouseholdNumber = (householdId) => {
+    console.log('getHouseholdNumber called with:', householdId);
+    console.log('Available households:', households);
     const household = households.find(h => h.id === householdId);
-    return household ? household.householdNumber : 'N/A';
+    console.log('Found household:', household);
+    return household ? (household.ownerName || household.soHoKhau || 'Không có số HK') : 'N/A';
   };
 
   const getServiceTypeLabel = (type) => {
@@ -306,7 +308,7 @@ const UtilityService = () => {
                   <MenuItem value="ALL">Tất cả</MenuItem>
                   {households.map(household => (
                     <MenuItem key={household.id} value={household.id}>
-                      {household.householdNumber}
+                      {household.ownerName}
                     </MenuItem>
                   ))}
                 </Select>
@@ -383,16 +385,6 @@ const UtilityService = () => {
                             </Box>
                           </TableCell>
                           <TableCell>{bill.notes}</TableCell>                          <TableCell align="right">
-                            <Tooltip title="Xem chi tiết">
-                              <IconButton
-                                size="small"
-                                color="primary"
-                                onClick={() => navigate(`/utilities/detail/${bill.id}`)}
-                              >
-                                <VisibilityIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            
                             <Tooltip title="Chỉnh sửa">
                               <IconButton
                                 size="small"

@@ -62,14 +62,16 @@ public class HoKhau {
     
     @Column(name = "ngay_lam_ho_khau")
     private LocalDate ngayLamHoKhau;
+      @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL)
+    @JsonIdentityReference(alwaysAsId = true)
+    private List<NopPhi> cacKhoanNop;
     
     @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL)
     @JsonIdentityReference(alwaysAsId = true)
-    private List<NopPhi> cacKhoanNop;
-      @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL)
     private List<NhanKhau> cacNhanKhau = new ArrayList<>();
     
     @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIdentityReference(alwaysAsId = true)
     private List<Vehicle> cacXe = new ArrayList<>();
       @Column(nullable = false)
     private boolean hoatDong = true;

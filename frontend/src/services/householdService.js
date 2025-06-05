@@ -55,24 +55,38 @@ export const getAllHouseholds = async (filters = {}) => {
     
     // Handle case where the data might be a string (JSON parse error from backend)
     let households = response.data;
-    
-    // If the response is a string, try to parse it as JSON
+      // If the response is a string, try to parse it as JSON
     if (typeof response.data === 'string') {
       try {
         console.log('Response data is a string, attempting to parse');
-        // If the backend returns a string due to serialization error, try to extract just the households array
-        // Looking for something that resembles JSON array structure
-        const match = response.data.match(/\[\s*\{\s*"id".*?\}\s*\]/s);
-        if (match) {
-          const jsonStr = match[0];
-          households = JSON.parse(jsonStr);
-          console.log('Successfully parsed households from string');
-        } else {
-          console.error('Could not find households array in response string');
-          return [];
+        console.log('Response data preview:', response.data.substring(0, 500) + '...');
+        
+        // First try to parse the entire string
+        try {
+          households = JSON.parse(response.data);
+          console.log('Successfully parsed entire response as JSON');
+        } catch (fullParseError) {
+          console.warn('Failed to parse entire response, trying to extract array:', fullParseError.message);
+          
+          // If the backend returns a string due to serialization error, try to extract just the households array
+          // Looking for something that resembles JSON array structure
+          const match = response.data.match(/\[\s*\{\s*"id".*?\}\s*\]/s);
+          if (match) {
+            const jsonStr = match[0];
+            households = JSON.parse(jsonStr);
+            console.log('Successfully parsed households from string');
+          } else {
+            console.error('Could not find households array in response string');
+            console.error('Response data first 1000 chars:', response.data.substring(0, 1000));
+            return [];
+          }
         }
       } catch (parseError) {
         console.error('Error parsing response data as JSON:', parseError);
+        console.error('Parse error details:', {
+          message: parseError.message,
+          responsePreview: response.data.substring(0, 1000)
+        });
         return [];
       }
     }

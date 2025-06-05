@@ -1,11 +1,13 @@
 package com.bluemoon.fees.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDate;
 
 @Data
@@ -14,6 +16,11 @@ import java.time.LocalDate;
 @Builder
 @Entity
 @Table(name = "tam_tru_tam_vang")
+@JsonIdentityInfo(
+  generator = ObjectIdGenerators.PropertyGenerator.class, 
+  property = "id",
+  scope = TamTruTamVang.class
+)
 public class TamTruTamVang {
     
     @Id
@@ -35,7 +42,7 @@ public class TamTruTamVang {
     
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "nhan_khau_id", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIdentityReference(alwaysAsId = true)
     private NhanKhau nhanKhau;
     
     // Add this field to store the nhanKhau ID for serialization purposes

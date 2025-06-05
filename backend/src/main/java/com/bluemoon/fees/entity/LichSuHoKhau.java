@@ -1,5 +1,8 @@
 package com.bluemoon.fees.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +16,11 @@ import java.time.LocalDate;
 @Builder
 @Entity
 @Table(name = "lich_su_ho_khau")
+@JsonIdentityInfo(
+  generator = ObjectIdGenerators.PropertyGenerator.class, 
+  property = "id",
+  scope = LichSuHoKhau.class
+)
 public class LichSuHoKhau {
     
     @Id
@@ -25,13 +33,14 @@ public class LichSuHoKhau {
     
     @Column(name = "thoi_gian", nullable = false)
     private LocalDate thoiGian;
-    
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+      @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "ho_khau_id", nullable = false)
+    @JsonIdentityReference(alwaysAsId = true)
     private HoKhau hoKhau;
     
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "nhan_khau_id", nullable = false)
+    @JsonIdentityReference(alwaysAsId = true)
     private NhanKhau nhanKhau;
     
     @Column(name = "ghi_chu")

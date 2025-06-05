@@ -128,9 +128,8 @@ const UtilityForm = () => {
       setError('Số tiền phải lớn hơn 0');
       return;
     }
-    
-    // Validate that new reading is greater than old reading for metered services
-    if (isMeteredService(formData.loaiDichVu) && 
+      // Validate that new reading is greater than old reading only for water and electricity services
+    if ((formData.loaiDichVu === 'NUOC' || formData.loaiDichVu === 'DIEN') && 
         parseFloat(formData.chiSoMoi) <= parseFloat(formData.chiSoCu)) {
       setError('Chỉ số mới phải lớn hơn chỉ số cũ');
       return;
@@ -196,21 +195,20 @@ const UtilityForm = () => {
     
     if (fieldMappings[name]) {
       updates[fieldMappings[name]] = value;
-    }
-      // Validate new reading for metered services
+    }    // Validate new reading for water and electricity services only
     if (name === 'chiSoMoi' || name === 'newReading') {
       const newReading = parseInt(value) || 0;
       const oldReading = parseInt(formData.chiSoCu || formData.oldReading) || 0;
       
-      // Hiển thị lỗi nếu số mới <= số cũ
-      if (newReading <= oldReading && newReading > 0) {
+      // Only show error for water and electricity services if new reading <= old reading
+      if ((formData.loaiDichVu === 'NUOC' || formData.loaiDichVu === 'DIEN') && 
+          newReading <= oldReading && newReading > 0) {
         setError('Chỉ số mới phải lớn hơn chỉ số cũ');
       } else {
         setError(null);
       }
     }
-    
-    // Set default unit based on service type
+      // Set default unit based on service type
     if (name === 'loaiDichVu' || name === 'serviceType') {
       if (value === 'DIEN') {
         updates.donViTinh = 'kWh';
@@ -218,12 +216,15 @@ const UtilityForm = () => {
       } else if (value === 'NUOC') {
         updates.donViTinh = 'm3';
         updates.unit = 'm3';
-      } else if (value === 'INTERNET') {
-        updates.donViTinh = 'Gói';
-        updates.unit = 'Gói';
-        // Fixed price for internet
-        updates.soTien = Math.floor(Math.random() * 200000) + 300000; // 300k-500k
-        updates.amount = updates.soTien;
+      } else {
+        // For non-metered services, set unit to empty string
+        updates.donViTinh = '';
+        updates.unit = '';
+        if (value === 'INTERNET') {
+          // Fixed price for internet
+          updates.soTien = Math.floor(Math.random() * 200000) + 300000; // 300k-500k
+          updates.amount = updates.soTien;
+        }
       }
     }
     
@@ -396,10 +397,8 @@ const UtilityForm = () => {
                     />
                   </Grid>
                 </>
-              )}
-
-              {/* Amount */}
-              <Grid item xs={12} md={6}>
+              )}              {/* Amount */}
+              <Grid item xs={12} md={isMeteredService(formData.loaiDichVu) ? 6 : 12}>
                 <TextField
                   fullWidth
                   type="number"
@@ -416,17 +415,19 @@ const UtilityForm = () => {
                 />
               </Grid>
 
-              {/* Unit */}
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Đơn vị tính"
-                  name="donViTinh"
-                  value={formData.donViTinh}
-                  onChange={handleChange}
-                  InputProps={{ readOnly: true }}
-                />
-              </Grid>
+              {/* Unit - Only show for metered services */}
+              {isMeteredService(formData.loaiDichVu) && (
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Đơn vị tính"
+                    name="donViTinh"
+                    value={formData.donViTinh}
+                    onChange={handleChange}
+                    InputProps={{ readOnly: true }}
+                  />
+                </Grid>
+              )}
 
               {/* Notes */}
               <Grid item xs={12}>

@@ -34,7 +34,6 @@ import {
   Search as SearchIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Visibility as VisibilityIcon,
   Refresh as RefreshIcon,
   DirectionsCar as CarIcon
 } from '@mui/icons-material';
@@ -164,10 +163,9 @@ const VehicleList = () => {
       navigate('/vehicles/add');
     }
   };
-
   const getHouseholdNumber = (householdId) => {
     const household = households.find(h => h.id === householdId);
-    return household ? household.householdNumber : 'N/A';
+    return household ? (household.ownerName || household.soHoKhau || 'Không có tên') : 'N/A';
   };
 
   const getVehicleTypeLabel = (type) => {
@@ -238,11 +236,10 @@ const VehicleList = () => {
                   value={filterHousehold}
                   label="Hộ gia đình"
                   onChange={(e) => setFilterHousehold(e.target.value)}
-                >
-                  <MenuItem value="ALL">Tất cả</MenuItem>
+                >                  <MenuItem value="ALL">Tất cả</MenuItem>
                   {households.map(household => (
                     <MenuItem key={household.id} value={household.id}>
-                      {household.householdNumber}
+                      {household.ownerName}
                     </MenuItem>
                   ))}
                 </Select>
@@ -314,18 +311,7 @@ const VehicleList = () => {
                             <Box sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                               {formatCurrency(getMonthlyFee(vehicle.vehicleType))}
                             </Box>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Tooltip title="Xem chi tiết">
-                              <IconButton
-                                size="small"
-                                color="primary"
-                                onClick={() => navigate(`/vehicles/detail/${vehicle.id}`)}
-                              >
-                                <VisibilityIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            
+                          </TableCell>                          <TableCell align="right">
                             <Tooltip title="Chỉnh sửa">
                               <IconButton
                                 size="small"
