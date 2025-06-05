@@ -128,10 +128,21 @@ const UtilityForm = () => {
       setError('Số tiền phải lớn hơn 0');
       return;
     }
+    
+    // Validate that new reading is greater than old reading for metered services
+    if (isMeteredService(formData.loaiDichVu) && 
+        parseFloat(formData.chiSoMoi) <= parseFloat(formData.chiSoCu)) {
+      setError('Chỉ số mới phải lớn hơn chỉ số cũ');
+      return;
+    }
 
     try {
       setSaving(true);
       setError(null);
+      
+      // Log để kiểm tra dữ liệu trước khi gửi lên server
+      console.log("Dữ liệu gửi đi:", formData);
+      console.log("Số tiền (soTien):", formData.soTien);
       
       if (isEdit) {
         await updateUtilityBill(id, formData);
@@ -186,25 +197,16 @@ const UtilityForm = () => {
     if (fieldMappings[name]) {
       updates[fieldMappings[name]] = value;
     }
-    
-    // Auto-calculate usage and amount for metered services
+      // Validate new reading for metered services
     if (name === 'chiSoMoi' || name === 'newReading') {
       const newReading = parseInt(value) || 0;
       const oldReading = parseInt(formData.chiSoCu || formData.oldReading) || 0;
-      const usage = Math.max(0, newReading - oldReading);
       
-      // Auto-calculate amount based on service type and usage
-      let unitPrice = 0;
-      if (formData.loaiDichVu === 'DIEN' || formData.serviceType === 'DIEN') {
-        unitPrice = Math.floor(Math.random() * 1000) + 2500; // 2500-3500 per kWh
-      } else if (formData.loaiDichVu === 'NUOC' || formData.serviceType === 'NUOC') {
-        unitPrice = Math.floor(Math.random() * 5000) + 15000; // 15000-20000 per m3
-      }
-      
-      if (unitPrice > 0) {
-        const calculatedAmount = usage * unitPrice;
-        updates.soTien = calculatedAmount;
-        updates.amount = calculatedAmount;
+      // Hiển thị lỗi nếu số mới <= số cũ
+      if (newReading <= oldReading && newReading > 0) {
+        setError('Chỉ số mới phải lớn hơn chỉ số cũ');
+      } else {
+        setError(null);
       }
     }
     
@@ -410,6 +412,7 @@ const UtilityForm = () => {
                     endAdornment: <InputAdornment position="end">₫</InputAdornment>
                   }}
                   inputProps={{ min: 0 }}
+                  helperText="Nhập số tiền thủ công"
                 />
               </Grid>
 

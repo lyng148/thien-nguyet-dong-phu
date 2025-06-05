@@ -23,7 +23,14 @@ import {
   LinearProgress,
   InputAdornment,
   Chip,
-  Grid
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Alert,
+  Snackbar
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -41,8 +48,9 @@ import PageHeader from '../common/PageHeader';
 import {
   getAllUtilityBills,
   getUtilityBillsByHousehold,
-  SERVICE_TYPES,
-  generateRandomUtilityBills
+  getUtilityBillsByMonthYear,
+  deleteUtilityBill,
+  SERVICE_TYPES
 } from '../../services/utilityService';
 import { getAllHouseholds } from '../../services/householdService';
 import { formatCurrency } from '../../services/feePaymentService';
@@ -57,6 +65,16 @@ const UtilityService = () => {
   const [filterService, setFilterService] = useState('ALL');
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
   const [filterYear, setFilterYear] = useState(new Date().getFullYear());
+  
+  // Delete dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [billToDelete, setBillToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  
+  // Snackbar state
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
   useEffect(() => {
     loadData();
@@ -72,13 +90,9 @@ const UtilityService = () => {
       const householdsData = await getAllHouseholds();
       setHouseholds(householdsData);
       
-      // Generate utility bills for all households for current month
-      const allBills = [];
-      for (const household of householdsData) {
-        const bills = generateRandomUtilityBills(household.id, filterMonth, filterYear);
-        allBills.push(...bills);
-      }
-      setUtilityBills(allBills);
+      // Lấy dữ liệu từ API thay vì tạo dữ liệu mẫu
+      const utilityBillsData = await getUtilityBillsByMonthYear(filterMonth, filterYear);
+      setUtilityBills(utilityBillsData);
     } catch (error) {
       console.error('Error loading data:', error);
     }
@@ -98,10 +112,10 @@ const UtilityService = () => {
       filtered = filtered.filter(bill => bill.serviceType === filterService);
     }
 
-    // Filter by month and year
-    filtered = filtered.filter(bill => 
-      bill.month === filterMonth && bill.year === filterYear
-    );
+    // Filter by month and year không cần filter nữa vì đã lấy theo tháng/năm từ API
+    // filtered = filtered.filter(bill => 
+    //   bill.month === filterMonth && bill.year === filterYear
+    // );
 
     setFilteredBills(filtered);
   };
@@ -109,9 +123,54 @@ const UtilityService = () => {
   const handleRefresh = () => {
     loadData();
   };
-
   const handleMonthYearChange = () => {
     loadData();
+  };
+
+  const handleDeleteClick = (bill) => {
+    setBillToDelete(bill);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!billToDelete) return;
+    
+    setDeleteLoading(true);
+    try {
+      await deleteUtilityBill(billToDelete.id);
+      setSnackbarMessage('Xóa hóa đơn thành công!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+      
+      // Refresh data
+      await loadData();
+    } catch (error) {
+      console.error('Error deleting utility bill:', error);
+      let errorMessage = 'Có lỗi xảy ra khi xóa hóa đơn';
+      
+      if (error.response?.status === 400) {
+        errorMessage = 'Không thể xóa hóa đơn đã thanh toán';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      setSnackbarMessage(errorMessage);
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    } finally {
+      setDeleteLoading(false);
+      setDeleteDialogOpen(false);
+      setBillToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setBillToDelete(null);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   const getHouseholdNumber = (householdId) => {
@@ -158,13 +217,10 @@ const UtilityService = () => {
     value: i + 1,
     label: `Tháng ${i + 1}`
   }));
-
   const years = Array.from({ length: 10 }, (_, i) => {
     const year = new Date().getFullYear() - 5 + i;
     return { value: year, label: year.toString() };
   });
-
-  const totalAmount = filteredBills.reduce((sum, bill) => sum + bill.amount, 0);
 
   return (
     <Box>
@@ -256,12 +312,7 @@ const UtilityService = () => {
                 </Select>
               </FormControl>
             </Grid>
-          </Grid>
-
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6" color="primary">
-              Tổng tiền: {formatCurrency(totalAmount)}
-            </Typography>
+          </Grid>          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
             <Tooltip title="Làm mới">
               <IconButton 
                 onClick={handleRefresh} 
@@ -331,8 +382,7 @@ const UtilityService = () => {
                               {formatCurrency(bill.amount)}
                             </Box>
                           </TableCell>
-                          <TableCell>{bill.notes}</TableCell>
-                          <TableCell align="right">
+                          <TableCell>{bill.notes}</TableCell>                          <TableCell align="right">
                             <Tooltip title="Xem chi tiết">
                               <IconButton
                                 size="small"
@@ -352,6 +402,16 @@ const UtilityService = () => {
                                 <EditIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
+                            
+                            <Tooltip title="Xóa">
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => handleDeleteClick(bill)}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -359,10 +419,70 @@ const UtilityService = () => {
                   </Table>
                 </TableContainer>
               )}
-            </>
-          )}
+            </>          )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Xác nhận xóa hóa đơn
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Bạn có chắc chắn muốn xóa hóa đơn{' '}
+            <strong>
+              {billToDelete && getServiceTypeLabel(billToDelete.serviceType)}
+            </strong>{' '}
+            của hộ gia đình{' '}
+            <strong>
+              {billToDelete && getHouseholdNumber(billToDelete.householdId)}
+            </strong>{' '}
+            tháng {filterMonth}/{filterYear} không?
+            <br />
+            <br />
+            <strong>Hành động này không thể hoàn tác.</strong>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={handleDeleteCancel}
+            color="primary"
+            disabled={deleteLoading}
+          >
+            Hủy
+          </Button>
+          <Button 
+            onClick={handleDeleteConfirm}
+            color="error"
+            variant="contained"
+            disabled={deleteLoading}
+          >
+            {deleteLoading ? 'Đang xóa...' : 'Xóa'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success/Error Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleSnackbarClose} 
+          severity={snackbarSeverity} 
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
