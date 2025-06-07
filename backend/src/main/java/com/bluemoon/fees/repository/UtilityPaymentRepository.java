@@ -17,8 +17,7 @@ public interface UtilityPaymentRepository extends JpaRepository<UtilityPayment, 
     List<UtilityPayment> findByHoKhauId(Long hoKhauId);
     
     // Find utility payments by utility service ID
-    List<UtilityPayment> findByUtilityServiceId(Long utilityServiceId);
-    
+
     // Find utility payments by household and month/year
     List<UtilityPayment> findByHoKhauIdAndThangAndNam(Long hoKhauId, Integer thang, Integer nam);
     
@@ -32,19 +31,12 @@ public interface UtilityPaymentRepository extends JpaRepository<UtilityPayment, 
     List<UtilityPayment> findByTrangThai(String trangThai);
     
     // Find utility payments with household and utility service information
-    @Query("SELECT up FROM UtilityPayment up LEFT JOIN FETCH up.hoKhau LEFT JOIN FETCH up.utilityService WHERE up.id = :id")
-    Optional<UtilityPayment> findByIdWithDetails(@Param("id") Long id);
-    
-    // Find all utility payments with household and utility service information
-    @Query("SELECT up FROM UtilityPayment up LEFT JOIN FETCH up.hoKhau LEFT JOIN FETCH up.utilityService")
-    List<UtilityPayment> findAllWithDetails();
-    
+
     // Search utility payments
-    @Query("SELECT up FROM UtilityPayment up LEFT JOIN FETCH up.hoKhau h LEFT JOIN FETCH up.utilityService us " +
+    @Query("SELECT up FROM UtilityPayment up LEFT JOIN FETCH up.hoKhau h " +
            "WHERE (:search IS NULL OR :search = '' OR " +
            "LOWER(h.soHoKhau) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(h.chuHo) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "LOWER(us.loaiDichVu) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(up.maGiaoDich) LIKE LOWER(CONCAT('%', :search, '%')))")
     List<UtilityPayment> searchUtilityPayments(@Param("search") String search);
     

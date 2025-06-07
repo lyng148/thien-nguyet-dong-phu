@@ -14,4 +14,8 @@ public interface HoKhauRepository extends JpaRepository<HoKhau, Long> {
     List<HoKhau> findByChuHoContainingIgnoreCase(String chuHo);
     List<HoKhau> findByAddressContainingIgnoreCase(String address);
     Optional<HoKhau> findBySoHoKhau(String soHoKhau);
+    
+    // Check if soHoKhau exists, excluding specific household ID for updates
+    boolean existsBySoHoKhau(String soHoKhau);
+    boolean existsBySoHoKhauAndIdNot(String soHoKhau, Long id);
 }

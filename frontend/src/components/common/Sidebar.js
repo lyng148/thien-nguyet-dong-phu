@@ -106,7 +106,7 @@ const menuItems = [
     icon: <UtilityIcon />, 
     path: '/utilities',
     adminOnly: false,
-    hideForToTruong: false,
+    hideForToTruong: true,
     hideForKeToan: false
   },
   { 
@@ -114,7 +114,7 @@ const menuItems = [
     icon: <PaymentIcon />, 
     path: '/fee-payments',
     adminOnly: false,
-    hideForToTruong: false,
+    hideForToTruong: true,
     hideForKeToan: false
   },
   { 

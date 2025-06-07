@@ -268,3 +268,15 @@ export const removePersonFromHousehold = async (householdId, personId, note) => 
     throw error;
   }
 };
+
+// Check if household number (soHoKhau) is duplicate
+export const checkDuplicateHouseholdNumber = async (soHoKhau, excludeId = null) => {
+  try {
+    const params = excludeId ? { excludeId } : {};
+    const response = await api.get(`/households/check-duplicate/${encodeURIComponent(soHoKhau)}`, { params });
+    return response.data.isDuplicate;
+  } catch (error) {
+    console.error(`Error checking duplicate for household number ${soHoKhau}:`, error);
+    throw error;
+  }
+};

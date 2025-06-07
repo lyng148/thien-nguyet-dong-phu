@@ -3,6 +3,7 @@ package com.bluemoon.fees.service.impl;
 import com.bluemoon.fees.entity.HoKhau;
 import com.bluemoon.fees.entity.LichSuHoKhau;
 import com.bluemoon.fees.entity.NhanKhau;
+import com.bluemoon.fees.exception.DuplicateHouseholdException;
 import com.bluemoon.fees.exception.ResourceNotFoundException;
 import com.bluemoon.fees.repository.HoKhauRepository;
 import com.bluemoon.fees.repository.LichSuHoKhauRepository;
@@ -65,6 +66,11 @@ public class HoKhauServiceImpl implements HoKhauService {
 
     @Override
     public HoKhau createHoKhau(HoKhau hoKhau) {
+        // Check for duplicate soHoKhau
+        if (isDuplicateSoHoKhau(hoKhau.getSoHoKhau())) {
+            throw new DuplicateHouseholdException("Số hộ khẩu '" + hoKhau.getSoHoKhau() + "' đã tồn tại trong hệ thống");
+        }
+        
         hoKhau.setSoThanhVien(0); // Start with 0 members
         hoKhau.setHoatDong(true);
         return hoKhauRepository.save(hoKhau);
@@ -74,6 +80,11 @@ public class HoKhauServiceImpl implements HoKhauService {
     public HoKhau updateHoKhau(Long id, HoKhau hoKhau) {
         HoKhau existingHoKhau = findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hộ khẩu với ID: " + id));
+        
+        // Check for duplicate soHoKhau excluding current record
+        if (isDuplicateSoHoKhauExcluding(hoKhau.getSoHoKhau(), id)) {
+            throw new DuplicateHouseholdException("Số hộ khẩu '" + hoKhau.getSoHoKhau() + "' đã tồn tại trong hệ thống");
+        }
         
         existingHoKhau.setSoHoKhau(hoKhau.getSoHoKhau());
         existingHoKhau.setChuHo(hoKhau.getChuHo());
@@ -209,5 +220,15 @@ public class HoKhauServiceImpl implements HoKhauService {
     public boolean existsById(Long id) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'existsById'");
+    }
+
+    @Override
+    public boolean isDuplicateSoHoKhau(String soHoKhau) {
+        return hoKhauRepository.existsBySoHoKhau(soHoKhau);
+    }
+
+    @Override
+    public boolean isDuplicateSoHoKhauExcluding(String soHoKhau, Long excludeId) {
+        return hoKhauRepository.existsBySoHoKhauAndIdNot(soHoKhau, excludeId);
     }
 }

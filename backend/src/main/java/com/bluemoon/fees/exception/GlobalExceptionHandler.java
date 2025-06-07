@@ -14,6 +14,11 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(DuplicateHouseholdException.class)
+    public ResponseEntity<Object> handleDuplicateHouseholdException(DuplicateHouseholdException ex) {
+        return createErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
         return createErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());

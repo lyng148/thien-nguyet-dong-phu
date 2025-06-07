@@ -42,12 +42,7 @@ public class UtilityPaymentController {
         return ResponseEntity.ok(payments);
     }
 
-    @GetMapping("/utility-service/{utilityServiceId}")
-    @PreAuthorize("hasAnyRole('ADMIN','TO_TRUONG', 'KE_TOAN')")
-    public ResponseEntity<List<UtilityPaymentDTO>> getUtilityPaymentsByUtilityService(@PathVariable Long utilityServiceId) {
-        List<UtilityPaymentDTO> payments = utilityPaymentService.getUtilityPaymentsByUtilityServiceId(utilityServiceId);
-        return ResponseEntity.ok(payments);
-    }
+
 
     @GetMapping("/date-range")
     @PreAuthorize("hasAnyRole('ADMIN','TO_TRUONG', 'KE_TOAN')")

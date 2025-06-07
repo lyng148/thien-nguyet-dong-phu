@@ -19,4 +19,8 @@ public interface HoKhauService extends BaseService<HoKhau, Long> {
     HoKhau addNhanKhauToHoKhau(Long hoKhauId, Long nhanKhauId, String quanHeVoiChuHo, String ghiChu);
     HoKhau removeNhanKhauFromHoKhau(Long hoKhauId, Long nhanKhauId, String ghiChu);
     List<NhanKhau> getNhanKhauInHoKhau(Long hoKhauId);
+    
+    // Duplicate validation methods
+    boolean isDuplicateSoHoKhau(String soHoKhau);
+    boolean isDuplicateSoHoKhauExcluding(String soHoKhau, Long excludeId);
 }

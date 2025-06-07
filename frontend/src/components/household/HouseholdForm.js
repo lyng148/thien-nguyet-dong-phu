@@ -17,7 +17,7 @@ import {
 import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 
 import PageHeader from '../common/PageHeader';
-import { getHouseholdById, createHousehold, updateHousehold } from '../../services/householdService';
+import { getHouseholdById, createHousehold, updateHousehold, checkDuplicateHouseholdNumber } from '../../services/householdService';
 import { isAdmin, isToTruong } from '../../utils/auth';
 
 const HouseholdForm = () => {
@@ -50,6 +50,13 @@ const HouseholdForm = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  
+  // Duplicate validation state
+  const [duplicateCheck, setDuplicateCheck] = useState({
+    isChecking: false,
+    isDuplicate: false,
+    hasChecked: false
+  });
 
   // Load household data if editing
   useEffect(() => {
@@ -94,7 +101,56 @@ const HouseholdForm = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    
+    // Check for duplicates when soHoKhau changes
+    if (name === 'soHoKhau') {
+      checkDuplicateHouseholdNumberDebounced(value);
+    }
   };
+
+  // Debounced duplicate check function
+  const checkDuplicateHouseholdNumberDebounced = React.useCallback(
+    debounce(async (soHoKhau) => {
+      if (soHoKhau && soHoKhau.trim() !== '') {
+        setDuplicateCheck(prev => ({ ...prev, isChecking: true }));
+        try {
+          const isDuplicate = await checkDuplicateHouseholdNumber(soHoKhau, isEdit ? id : null);
+          setDuplicateCheck({
+            isChecking: false,
+            isDuplicate,
+            hasChecked: true
+          });
+        } catch (error) {
+          console.error('Error checking duplicate household number:', error);
+          setDuplicateCheck({
+            isChecking: false,
+            isDuplicate: false,
+            hasChecked: false
+          });
+        }
+      } else {
+        setDuplicateCheck({
+          isChecking: false,
+          isDuplicate: false,
+          hasChecked: false
+        });
+      }
+    }, 500),
+    [isEdit, id]
+  );
+
+  // Simple debounce function
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
 
   // Handle number input
   const handleNumberChange = (e) => {
@@ -113,6 +169,13 @@ const HouseholdForm = () => {
     setError(null);
     setSuccess(null);
     setSaving(true);
+    
+    // Check for duplicate household number before submitting
+    if (duplicateCheck.isDuplicate) {
+      setError('Không thể lưu hộ khẩu với số hộ khẩu đã tồn tại');
+      setSaving(false);
+      return;
+    }
     
     try {
       // Construct address from components
@@ -247,6 +310,21 @@ const HouseholdForm = () => {
                     onChange={handleChange}
                     fullWidth
                     disabled={saving}
+                    error={duplicateCheck.hasChecked && duplicateCheck.isDuplicate}
+                    helperText={
+                      duplicateCheck.isChecking 
+                        ? 'Đang kiểm tra...' 
+                        : duplicateCheck.hasChecked && duplicateCheck.isDuplicate 
+                          ? 'Số hộ khẩu này đã tồn tại trong hệ thống'
+                          : duplicateCheck.hasChecked && !duplicateCheck.isDuplicate
+                            ? 'Số hộ khẩu hợp lệ'
+                            : ''
+                    }
+                    InputProps={{
+                      endAdornment: duplicateCheck.isChecking ? (
+                        <CircularProgress size={20} />
+                      ) : null
+                    }}
                   />
                 </Grid>
 
@@ -389,13 +467,15 @@ const HouseholdForm = () => {
                   type="submit"
                   variant="contained"
                   startIcon={<SaveIcon />}
-                  disabled={saving}
+                  disabled={saving || duplicateCheck.isDuplicate}
                 >
                   {saving ? (
                     <>
                       <CircularProgress size={20} sx={{ mr: 1 }} />
                       Đang lưu...
                     </>
+                  ) : duplicateCheck.isDuplicate ? (
+                    'Số hộ khẩu đã tồn tại'
                   ) : (
                     'Lưu hộ khẩu'
                   )}

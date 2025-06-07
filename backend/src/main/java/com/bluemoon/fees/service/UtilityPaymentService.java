@@ -12,8 +12,7 @@ public interface UtilityPaymentService {
     
     List<UtilityPaymentDTO> getUtilityPaymentsByHoKhauId(Long hoKhauId);
     
-    List<UtilityPaymentDTO> getUtilityPaymentsByUtilityServiceId(Long utilityServiceId);
-    
+
     List<UtilityPaymentDTO> getUtilityPaymentsByDateRange(LocalDate startDate, LocalDate endDate);
     
     List<UtilityPaymentDTO> getUtilityPaymentsByHouseholdAndMonth(Long hoKhauId, Integer thang, Integer nam);

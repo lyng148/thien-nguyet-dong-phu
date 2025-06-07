@@ -45,13 +45,7 @@ public class UtilityPaymentServiceImpl implements UtilityPaymentService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<UtilityPaymentDTO> getUtilityPaymentsByUtilityServiceId(Long utilityServiceId) {
-        return utilityPaymentRepository.findByUtilityServiceId(utilityServiceId).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -102,14 +96,13 @@ public class UtilityPaymentServiceImpl implements UtilityPaymentService {
             try {
                 UtilityService utilityService = utilityServiceRepository.findById(request.getUtilityServiceId())
                     .orElse(null);
-                payment.setUtilityService(utilityService);
-                payment.setUtilityServiceId(request.getUtilityServiceId());
+
             } catch (Exception e) {
                 // Bỏ qua nếu không tìm thấy utilityService
             }
         } else {
             // Nếu không có utilityServiceId, sử dụng giá trị mặc định là 1 để tránh null
-            payment.setUtilityServiceId(1L);
+
         }
         
         payment.setThang(thang);
@@ -144,8 +137,7 @@ public class UtilityPaymentServiceImpl implements UtilityPaymentService {
                 UtilityService utilityService = utilityServiceRepository.findById(request.getUtilityServiceId())
                     .orElse(null);
                 if (utilityService != null) {
-                    payment.setUtilityService(utilityService);
-                    payment.setUtilityServiceId(request.getUtilityServiceId());
+
                 }
             } catch (Exception e) {
                 // Bỏ qua nếu không tìm thấy utilityService
@@ -220,16 +212,7 @@ public class UtilityPaymentServiceImpl implements UtilityPaymentService {
         dto.setHoKhauId(payment.getHoKhau().getId());
         dto.setSoHoKhau(payment.getHoKhau().getSoHoKhau());
         dto.setChuHo(payment.getHoKhau().getChuHo());
-        
-        // UtilityService có thể null, xử lý an toàn
-        if (payment.getUtilityService() != null) {
-            dto.setUtilityServiceId(payment.getUtilityService().getId());
-            dto.setLoaiDichVu(payment.getUtilityService().getLoaiDichVu());
-        } else {
-            dto.setUtilityServiceId(payment.getUtilityServiceId());
-            dto.setLoaiDichVu("Không xác định");
-        }
-        
+
         dto.setThang(payment.getThang());
         dto.setNam(payment.getNam());
         dto.setSoTienThanhToan(payment.getSoTienThanhToan());

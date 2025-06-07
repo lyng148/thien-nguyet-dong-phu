@@ -84,6 +84,22 @@ public class HoKhauController {
         return ResponseEntity.ok(hoKhauList);
     }
 
+    @GetMapping("/check-duplicate/{soHoKhau}")
+    public ResponseEntity<Map<String, Boolean>> checkDuplicateSoHoKhau(
+            @PathVariable String soHoKhau,
+            @RequestParam(required = false) Long excludeId) {
+        log.info("Checking duplicate for soHoKhau: {}, excludeId: {}", soHoKhau, excludeId);
+        
+        boolean isDuplicate;
+        if (excludeId != null) {
+            isDuplicate = hoKhauService.isDuplicateSoHoKhauExcluding(soHoKhau, excludeId);
+        } else {
+            isDuplicate = hoKhauService.isDuplicateSoHoKhau(soHoKhau);
+        }
+        
+        return ResponseEntity.ok(Map.of("isDuplicate", isDuplicate));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('TO_TRUONG')")
     public ResponseEntity<HoKhau> createHoKhau(@RequestBody HoKhau hoKhau) {

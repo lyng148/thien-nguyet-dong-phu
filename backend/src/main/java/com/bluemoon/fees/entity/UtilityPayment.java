@@ -27,13 +27,6 @@ public class UtilityPayment {
     @JsonBackReference
     private HoKhau hoKhau;
 
-    @Column(name = "utility_service_id", nullable = true)
-    private Long utilityServiceId;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "utility_service_id", insertable = false, updatable = false)
-    private UtilityService utilityService;
-    
     // Thêm các trường mới để theo dõi các loại phí
     @Column(name = "phi_gui_xe")
     private Double phiGuiXe = 0.0;
